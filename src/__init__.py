@@ -1,1 +1,1 @@
-"""The package containing the main application code for the backend."""
+"""The package containing the main application code for the app."""

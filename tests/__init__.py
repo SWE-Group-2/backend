@@ -1,1 +1,1 @@
-"""All the backend unit tests."""
+"""All the app unit tests."""
