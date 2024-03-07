@@ -1,6 +1,7 @@
 """Package for the app of the application.""" ""
 from flask import Flask
 
+from app.extensions import db
 from config import Config
 
 
@@ -8,6 +9,9 @@ def create_app() -> Flask:
     """Create the Flask application."""
     app = Flask(__name__)
     app.config.from_object(Config)
+
+    # Initialize extensions
+    db.init_app(app)
 
     # Register blueprints
     from src.app.main import bp as main_blueprint
