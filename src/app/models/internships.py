@@ -7,7 +7,6 @@ class Internships(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     company = db.Column(db.String(255), nullable=False)
     position = db.Column(db.String(255), nullable=False)
-    skills_required = db.Column(db.String(255), nullable=False)
     website = db.Column(db.String(255), nullable=False)
     deadline = db.Column(db.Date, nullable=False)
     author_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
