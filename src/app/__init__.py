@@ -1,8 +1,8 @@
 """Package for the app of the application.""" ""
 from flask import Flask
 
-from app.extensions import db
 from config import Config
+from src.app.extensions import db
 
 
 def create_app() -> Flask:
