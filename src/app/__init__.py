@@ -1,8 +1,8 @@
 """Package for the app of the application.""" ""
 from flask import Flask
 
-from app.extensions import db
 from config import Config
+from src.app.extensions import db
 
 
 def create_app() -> Flask:
@@ -12,6 +12,15 @@ def create_app() -> Flask:
 
     # Initialize extensions
     db.init_app(app)
+
+    # Create the database tables
+    from src.app.models.internships import Internships  # noqa: F401
+    from src.app.models.roles import Roles  # noqa: F401
+    from src.app.models.time_periods import TimePeriods  # noqa: F401
+    from src.app.models.users import Users  # noqa: F401
+
+    with app.app_context():
+        db.create_all()
 
     # Register blueprints
     from src.app.main import bp as main_blueprint
