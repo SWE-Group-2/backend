@@ -19,7 +19,7 @@ poetry run pre-commit install
 ```
 Also feel free to set up Poetry interpreter in Pycharm by going to `File` -> `Settings` -> `Project: backend` -> `Python Interpreter` -> `Add Interpreter` -> `Add Local Interpreter` -> `Poetry Environment`. Then you won't have to type `poetry run` before every command. Afterward, you can run the backend using
 ```bash
-poetry run flask run
+poetry run flask --app src/app run
 ```
 ## Docker Setup
 After setting up the project structure as follows
