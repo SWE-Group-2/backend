@@ -1,5 +1,6 @@
 """Package for the app of the application.""" ""
 from flask import Flask
+from flask_cors import CORS
 
 from config import Config
 from src.app.extensions import db
@@ -9,6 +10,7 @@ def create_app() -> Flask:
     """Create the Flask application."""
     app = Flask(__name__)
     app.config.from_object(Config)
+    CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
 
     # Initialize extensions
     db.init_app(app)
