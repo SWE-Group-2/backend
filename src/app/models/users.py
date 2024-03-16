@@ -10,6 +10,11 @@ class Users(db.Model):
     username = db.Column(db.String(255), unique=True)
     password = db.Column(db.String(255), nullable=False)
     gpa = db.Column(db.Float)
+    academic_year = db.Column(db.String(255))
+    github_link = db.Column(db.String(255))
+    linkedin_link = db.Column(db.String(255))
+    website_link = db.Column(db.String(255))
+    phone_number = db.Column(db.String(255))
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     internship_time_period_id = db.Column(db.Integer, db.ForeignKey("time_periods.id"))
 
