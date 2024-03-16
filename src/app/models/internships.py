@@ -14,7 +14,7 @@ class Internships(db.Model):
         db.Integer, db.ForeignKey("time_periods.id"), nullable=False
     )
     flagged = db.Column(db.Boolean, default=False)
-    flagged_amount = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, server_default=db.func.now())
 
     def __repr__(self) -> str:
         """Return a string representation of the Internship."""
