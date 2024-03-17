@@ -33,9 +33,9 @@ def create_app() -> Flask:
 
     app.register_blueprint(internship_blueprint)
 
-    from src.app.student import bp as student_blueprint
+    from src.app.users import bp as users_blueprint
 
-    app.register_blueprint(student_blueprint)
+    app.register_blueprint(users_blueprint)
 
     from src.app.admin import bp as admin_blueprint
 

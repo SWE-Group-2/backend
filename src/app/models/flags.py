@@ -9,6 +9,7 @@ class Flags(db.model):
     internship_id = db.Column(
         db.Integer, db.ForeignKey("internships.id"), nullable=False
     )
+    reason = db.Column(db.String(255))
 
     def __repr__(self) -> str:
         """Return a string representation of the Flag."""
