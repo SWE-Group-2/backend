@@ -13,6 +13,7 @@ class Internships(db.Model):
     time_period_id = db.Column(
         db.Integer, db.ForeignKey("time_periods.id"), nullable=False
     )
+    company_photo_link = db.Column(db.String(255))
     flagged = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, server_default=db.func.now())
 
