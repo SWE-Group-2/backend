@@ -23,15 +23,22 @@ def add_internship() -> Response:
         deadline = datetime.strptime(request.json["deadline"], "%Y-%m-%d")
         author_id = request.json["author_id"]
         time_period_id = request.json["time_period_id"]
+        company_photo_link = request.json.get("company_photo_link")
     except KeyError:
         response = {"message": "Invalid request body"}
         return make_response(jsonify(response), 400)
 
     InternshipService.create_internship(
-        company, position, website, deadline, author_id, time_period_id
+        company,
+        position,
+        website,
+        deadline,
+        author_id,
+        time_period_id,
+        company_photo_link,
     )
 
-    response = {"message": "Time period added successfully"}
+    response = {"message": "Internship added successfully"}
     return make_response(jsonify(response), 201)
 
 
