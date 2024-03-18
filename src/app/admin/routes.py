@@ -16,9 +16,13 @@ def index() -> str:
 @bp.route("/admin/add_time_period", methods=["POST"])
 def add_time_period() -> Response:
     """Return example text for the add time period endpoint."""
-    start_date = datetime.strptime(request.json["start_date"], "%Y-%m-%d")
-    end_date = datetime.strptime(request.json["end_date"], "%Y-%m-%d")
-    name = request.json["name"]
+    try:
+        start_date = datetime.strptime(request.json["start_date"], "%Y-%m-%d")
+        end_date = datetime.strptime(request.json["end_date"], "%Y-%m-%d")
+        name = request.json["name"]
+    except KeyError:
+        response = {"message": "Invalid request body"}
+        return make_response(jsonify(response), 400)
 
     AdminService.create_time_period(start_date, end_date, name)
 

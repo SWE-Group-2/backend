@@ -20,3 +20,13 @@ def test_add_time_period(test_client: FlaskClient, session: db.session) -> None:
     assert time_period.start_date == datetime.strptime("2020-01-01", "%Y-%m-%d").date()
     assert time_period.end_date == datetime.strptime("2020-02-01", "%Y-%m-%d").date()
     assert time_period.name == "T1_2020-2021"
+
+
+def test_add_time_period_invalid_request(test_client: FlaskClient) -> None:
+    """Test the add time period endpoint with an invalid request."""
+    data = {
+        "mr": "bombastic",
+    }
+    response = test_client.post("/admin/add_time_period", json=data)
+    assert response.status_code == 400
+    assert response.json == {"message": "Invalid request body"}
