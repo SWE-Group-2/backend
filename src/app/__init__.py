@@ -8,10 +8,10 @@ from config import Config
 from src.app.extensions import db
 
 
-def create_app(config: Optional) -> Flask:
+def create_app(config: Optional = Config) -> Flask:
     """Create the Flask application."""
     app = Flask(__name__)
-    app.config.from_object(Config if config is None else config)
+    app.config.from_object(config)
     CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
 
     # Initialize extensions
