@@ -26,6 +26,20 @@ def create_app(config: Optional = Config) -> Flask:
     with app.app_context():
         db.create_all()
 
+        if Roles.query.count() == 0:
+            admin_role = Roles(role="Admin")
+            instructor_role = Roles(role="Instructor")
+            student_role = Roles(role="Student")
+            db.session.add(admin_role)
+            db.session.add(instructor_role)
+            db.session.add(student_role)
+
+        if not Users.query.filter_by(username="admin").first():
+            admin_user = Users(username="admin", password="admin", role_id=1)
+            db.session.add(admin_user)
+
+        db.session.commit()
+
     # Register blueprints
     from src.app.main import bp as main_blueprint
 
