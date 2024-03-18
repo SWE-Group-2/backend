@@ -14,7 +14,10 @@ class Users(db.Model):
     github_link = db.Column(db.String(255))
     linkedin_link = db.Column(db.String(255))
     website_link = db.Column(db.String(255))
+    profile_picture_link = db.Column(db.String(255))
+    email = db.Column(db.String(255))
     phone_number = db.Column(db.String(255))
+    description = db.Column(db.String(500))
     role_id = db.Column(db.Integer, db.ForeignKey("roles.id"), nullable=False)
     internship_time_period_id = db.Column(db.Integer, db.ForeignKey("time_periods.id"))
 
