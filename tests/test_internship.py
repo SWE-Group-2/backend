@@ -26,6 +26,8 @@ def test_create_internship(test_client: FlaskClient, session: db.session) -> Non
     assert internship.deadline == datetime.strptime("2023-04-30", "%Y-%m-%d").date()
     assert internship.author_id == 1
     assert internship.time_period_id == 1
+    assert internship.flagged is False
+    assert internship.created_at.date() == datetime.now().date()
 
 
 def test_create_internship_invalid_request(test_client: FlaskClient) -> None:
