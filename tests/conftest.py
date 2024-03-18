@@ -22,7 +22,7 @@ class TestConfig:
 
 
 @pytest.fixture(scope="session")
-def app() -> typing.Generator[Flask]:
+def app() -> typing.Generator[Flask, None, None]:
     app = create_app(config=TestConfig)
     with app.app_context():
         yield app
