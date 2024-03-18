@@ -6,6 +6,7 @@ from flask_cors import CORS
 
 from config import Config
 from src.app.extensions import db
+from src.app.utils.password_hasher import PasswordHasher
 
 
 def create_app(config: Optional = Config) -> Flask:
@@ -24,9 +25,11 @@ def create_app(config: Optional = Config) -> Flask:
     from src.app.models.users import Users  # noqa: F401
 
     with app.app_context():
+        print("Creating DB")
         db.create_all()
 
         if Roles.query.count() == 0:
+            print("Initializing roles")
             admin_role = Roles(role="Admin")
             instructor_role = Roles(role="Instructor")
             student_role = Roles(role="Student")
@@ -35,7 +38,12 @@ def create_app(config: Optional = Config) -> Flask:
             db.session.add(student_role)
 
         if not Users.query.filter_by(username="admin").first():
-            admin_user = Users(username="admin", password="admin", role_id=1)
+            print("Initializing admin user")
+            admin_user = Users(
+                username="admin",
+                password=PasswordHasher.hash_password(password="hardpass"),
+                role_id=1,
+            )
             db.session.add(admin_user)
 
         db.session.commit()
