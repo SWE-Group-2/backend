@@ -1,4 +1,5 @@
 """Package for the app of the application.""" ""
+import datetime
 from typing import Optional
 
 from flask import Flask
@@ -37,6 +38,8 @@ def create_app(config: Optional = Config) -> Flask:
             db.session.add(instructor_role)
             db.session.add(student_role)
 
+            db.session.commit()
+
         if not Users.query.filter_by(username="admin").first():
             print("Initializing admin user")
             admin_user = Users(
@@ -45,6 +48,33 @@ def create_app(config: Optional = Config) -> Flask:
                 role_id=1,
             )
             db.session.add(admin_user)
+            db.session.commit()
+
+        if TimePeriods.query.count() == 0:
+            print("Initializing time periods")
+            time_period = TimePeriods(
+                name="Fall 2021",
+                start_date=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+                end_date=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+            )
+            db.session.add(time_period)
+            db.session.commit()
+
+        # prepopulate with internship data for testing, does not work cuz of foreign key
+        if Internships.query.count() == 0:
+            print("Initializing internships")
+            internship = Internships(
+                company="test company",
+                position="facility manager",
+                website="www.test.com",
+                deadline=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+                author_id=1,
+                time_period_id=1,
+                company_photo_link="www.test.com",
+                flagged=False,
+                created_at=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+            )
+            db.session.add(internship)
 
         db.session.commit()
 
