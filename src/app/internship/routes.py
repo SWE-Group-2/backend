@@ -33,3 +33,11 @@ def add_internship() -> Response:
 
     response = {"message": "Time period added successfully"}
     return make_response(jsonify(response), 201)
+
+
+@bp.route("/internship/get_internships", methods=["GET"])
+def get_internships() -> Response:
+    """Return all internships."""
+    internships = InternshipService.get_internships()
+    response = {"internships": [internship.to_dict() for internship in internships]}
+    return make_response(jsonify(response), 200)

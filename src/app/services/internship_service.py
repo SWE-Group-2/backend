@@ -32,3 +32,8 @@ class InternshipService:
         db.session.add(internship)
         db.session.commit()
         return internship
+
+    @staticmethod
+    def get_internships() -> list[Internships]:
+        """Return all internships."""
+        return Internships.query.all()

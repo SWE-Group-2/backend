@@ -38,3 +38,10 @@ def test_add_internship_invalid_request(test_client: FlaskClient) -> None:
     response = test_client.post("/internship/add_internship", json=data)
     assert response.status_code == 400
     assert response.json == {"message": "Invalid request body"}
+
+
+def test_get_internships(test_client: FlaskClient) -> None:
+    """Test the get internships endpoint."""
+    response = test_client.get("/internship/get_internships")
+    assert response.status_code == 200
+    assert response.json == {"internships": []}
