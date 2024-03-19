@@ -38,7 +38,7 @@ def add_internship() -> Response:
         company_photo_link,
     )
 
-    response = {"message": "Internship added successfully"}
+    response = {"message": "Internship created successfully"}
     return make_response(jsonify(response), 201)
 
 
