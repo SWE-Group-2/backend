@@ -25,6 +25,10 @@ def register() -> Response:
         response = {"message": "Invalid request body"}
         return make_response(jsonify(response), 400)
 
+    if UserService.get_user_by_username(username=username):
+        response = {"message": "Username already exists"}
+        return make_response(jsonify(response), 409)
+
     UserService.create_user(
         first_name=first_name,
         last_name=last_name,

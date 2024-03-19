@@ -32,3 +32,16 @@ def test_register_invalid_request(test_client: FlaskClient) -> None:
     response = test_client.post("/users/register", json=data)
     assert response.status_code == 400
     assert response.json == {"message": "Invalid request body"}
+
+
+def test_register_existing_user(test_client: FlaskClient, session: db.session) -> None:
+    """Test the register endpoint with an existing user."""
+    data = {
+        "first_name": "Test",
+        "last_name": "User",
+        "username": "admin",
+        "password": "hardpass",
+    }
+    response = test_client.post("/users/register", json=data)
+    assert response.status_code == 409
+    assert response.json == {"message": "Username already exists"}

@@ -25,3 +25,8 @@ class UserService:
         db.session.add(user)
         db.session.commit()
         return user
+
+    @staticmethod
+    def get_user_by_username(username: str) -> Users:
+        """Return a user by username."""
+        return Users.query.filter_by(username=username).first()
