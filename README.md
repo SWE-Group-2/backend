@@ -9,6 +9,7 @@
 [![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=SWE-Group-2_backend&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=SWE-Group-2_backend)
 [![Maintainability Rating](https://sonarcloud.io/api/project_badges/measure?project=SWE-Group-2_backend&metric=sqale_rating)](https://sonarcloud.io/summary/new_code?id=SWE-Group-2_backend)
 ## Local Setup
+### Poetry
 First setup poetry and install the dependencies.
 ```bash
 poetry install
@@ -21,6 +22,8 @@ Also feel free to set up Poetry interpreter in Pycharm by going to `File` -> `Se
 ```bash
 poetry run flask --app src/app run
 ```
+### Environment Variables
+The project expects a `.env` file in the root directory with the following variables. See `.env.example` for an example.
 ## Docker Setup
 After setting up the project structure as follows
 ```shell
