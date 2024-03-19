@@ -16,7 +16,7 @@ def test_add_internship(test_client: FlaskClient, session: db.session) -> None:
         "author_id": 1,
         "time_period_id": 1,
     }
-    response = test_client.post("/internships", json=data)
+    response = test_client.post("/internships/add_internship", json=data)
     assert response.status_code == 201
     assert response.json == {"message": "Internship created successfully"}
     internship = session.query(Internships).first()
