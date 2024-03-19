@@ -13,7 +13,7 @@ def index() -> str:
     return "This is the internship blueprint."
 
 
-@bp.route("/internship/add_internship", methods=["POST"])
+@bp.route("/internships/add_internship", methods=["POST"])
 def add_internship() -> Response:
     """Return example text for the add internship endpoint."""
     try:
@@ -38,7 +38,7 @@ def add_internship() -> Response:
         company_photo_link,
     )
 
-    response = {"message": "Internship added successfully"}
+    response = {"message": "Internship created successfully"}
     return make_response(jsonify(response), 201)
 
 
