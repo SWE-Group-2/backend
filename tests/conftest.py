@@ -1,3 +1,4 @@
+import enum
 import os
 import typing
 
@@ -19,6 +20,13 @@ class TestConfig:
     SQLALCHEMY_DATABASE_URI = os.getenv(
         "TEST_DATABASE_URI"
     ) or "sqlite:///" + os.path.join(basedir, "test.db")
+
+
+class EndpointEnum(enum.Enum):
+    """Enum for the endpoints of the application."""
+
+    login = "/users/login"
+    get_current_user = "/users/get_current_user"
 
 
 @pytest.fixture(scope="session")
