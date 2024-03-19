@@ -1,9 +1,12 @@
 """Package for the app of the application.""" ""
 import datetime
+import os
 from typing import Optional
 
+from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
+from flask_jwt_extended import JWTManager
 
 from config import Config
 from src.app.extensions import db
@@ -12,9 +15,12 @@ from src.app.utils.password_hasher import PasswordHasher
 
 def create_app(config: Optional = Config) -> Flask:
     """Create the Flask application."""
+    load_dotenv()
     app = Flask(__name__)
     app.config.from_object(config)
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
     CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
+    JWTManager(app)
 
     # Initialize extensions
     db.init_app(app)
