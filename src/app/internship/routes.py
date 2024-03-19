@@ -42,7 +42,7 @@ def add_internship() -> Response:
     return make_response(jsonify(response), 201)
 
 
-@bp.route("/internship/get_internships", methods=["GET"])
+@bp.route("/internships", methods=["GET"])
 def get_internships() -> Response:
     """Return all internships endpoint."""
     internships = InternshipService.get_internships()

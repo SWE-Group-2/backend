@@ -16,9 +16,9 @@ def test_add_internship(test_client: FlaskClient, session: db.session) -> None:
         "author_id": 1,
         "time_period_id": 1,
     }
-    response = test_client.post("/internship/add_internship", json=data)
+    response = test_client.post("/internships", json=data)
     assert response.status_code == 201
-    assert response.json == {"message": "Time period added successfully"}
+    assert response.json == {"message": "Internship created successfully"}
     internship = session.query(Internships).first()
     assert internship.company == "Wirecard"
     assert internship.position == "Facility manager"
@@ -42,6 +42,6 @@ def test_add_internship_invalid_request(test_client: FlaskClient) -> None:
 
 def test_get_internships(test_client: FlaskClient) -> None:
     """Test the get internships endpoint."""
-    response = test_client.get("/internship/get_internships")
+    response = test_client.get("/internships")
     assert response.status_code == 200
     assert response.json == {"internships": []}
