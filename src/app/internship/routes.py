@@ -7,12 +7,6 @@ from src.app.internship import bp
 from src.app.services.internship_service import InternshipService
 
 
-@bp.route("/internship")
-def index() -> str:
-    """Return example text for the internship blueprint."""
-    return "This is the internship blueprint."
-
-
 @bp.route("/internships/add_internship", methods=["POST"])
 def add_internship() -> Response:
     """Return example text for the add internship endpoint."""
@@ -50,6 +44,7 @@ def get_internships() -> Response:
     # Convert SQLAlchemy objects to dictionaries for JSON serialization
     internships_data = [
         {
+            "id": internship.id,
             "company": internship.company,
             "position": internship.position,
             "website": internship.website,
@@ -62,6 +57,31 @@ def get_internships() -> Response:
         }
         for internship in internships
     ]
+
+    return jsonify(internships_data)
+
+
+@bp.route("/internships/<internship_id>", methods=["GET"])
+def view_internship(internship_id: str) -> Response:
+    """Return internship information."""
+    internship = InternshipService.get_internship(internship_id)
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+
+    internships_data = {
+        "id": internship.id,
+        "company": internship.company,
+        "position": internship.position,
+        "website": internship.website,
+        "deadline": internship.deadline.strftime("%Y-%m-%d"),
+        "author_id": internship.author_id,
+        "time_period_id": internship.time_period_id,
+        "company_photo_link": internship.company_photo_link,
+        "flagged": internship.flagged,
+        "created_at": internship.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+    }
 
     return jsonify(internships_data)
 
