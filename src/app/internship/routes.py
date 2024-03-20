@@ -64,3 +64,33 @@ def get_internships() -> Response:
     ]
 
     return jsonify(internships_data)
+
+
+@bp.route("/internships/{internship_id}", methods=["PUT"])
+def update_internship(internship_id: int) -> Response:
+    """Return example text for the update internship endpoint."""
+    try:
+        company = request.json["company"]
+        position = request.json["position"]
+        website = request.json["website"]
+        deadline = datetime.strptime(request.json["deadline"], "%Y-%m-%d")
+        time_period_id = request.json["time_period_id"]
+        company_photo_link = request.json.get("company_photo_link")
+        flagged = request.json["flagged"]
+    except KeyError:
+        response = {"message": "Invalid request body"}
+        return make_response(jsonify(response), 400)
+
+    InternshipService.update_internship_by_id(
+        internship_id,
+        company,
+        position,
+        website,
+        deadline,
+        time_period_id,
+        company_photo_link,
+        flagged,
+    )
+
+    response = {"message": "Internship updated successfully"}
+    return make_response(jsonify(response), 200)
