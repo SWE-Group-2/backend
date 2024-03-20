@@ -19,7 +19,7 @@ def create_app(config: Optional = Config) -> Flask:
     app = Flask(__name__)
     app.config.from_object(config)
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
-    CORS(app, resources={r"/*": {"origins": "http://localhost:8080"}})
+    CORS(app, resources={r"/*": {"origins": "*"}})
     JWTManager(app)
 
     # Initialize extensions
