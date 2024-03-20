@@ -24,3 +24,23 @@ class Users(db.Model):
     def __repr__(self) -> str:
         """Return a string representation of the User."""
         return f"<User '{self.username}'>"
+
+    def to_dict(self) -> dict:
+        """Return a dictionary representation of the User."""
+        return {
+            "id": self.id,
+            "first_name": self.first_name,
+            "last_name": self.last_name,
+            "username": self.username,
+            "gpa": self.gpa,
+            "academic_year": self.academic_year,
+            "github_link": self.github_link,
+            "linkedin_link": self.linkedin_link,
+            "website_link": self.website_link,
+            "profile_picture_link": self.profile_picture_link,
+            "email": self.email,
+            "phone_number": self.phone_number,
+            "description": self.description,
+            "role_id": self.role_id,
+            "internship_time_period_id": self.internship_time_period_id,
+        }
