@@ -48,6 +48,7 @@ def test_get_internships(test_client: FlaskClient, session: db.session) -> None:
     internship = session.query(Internships).first()
     internship_json = [
         {
+            "id": internship.id,
             "company": internship.company,
             "position": internship.position,
             "website": internship.website,
