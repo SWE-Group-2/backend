@@ -50,6 +50,7 @@ def get_internships() -> Response:
     # Convert SQLAlchemy objects to dictionaries for JSON serialization
     internships_data = [
         {
+            "id": internship.id,
             "company": internship.company,
             "position": internship.position,
             "website": internship.website,
