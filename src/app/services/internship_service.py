@@ -37,3 +37,11 @@ class InternshipService:
     def get_internships() -> list[Internships]:
         """Return all internships."""
         return Internships.query.all()
+
+    @staticmethod
+    def delete_internship(internship_id: int) -> None:
+        """Delete an internship."""
+        internship = Internships.query.get(internship_id)
+        db.session.delete(internship)
+        db.session.commit()
+        return None

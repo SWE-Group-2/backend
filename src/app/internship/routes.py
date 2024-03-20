@@ -2,9 +2,11 @@
 from datetime import datetime
 
 from flask import Response, jsonify, make_response, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.internship import bp
 from src.app.services.internship_service import InternshipService
+from src.app.services.user_service import UserService
 
 
 @bp.route("/internship")
@@ -64,3 +66,30 @@ def get_internships() -> Response:
     ]
 
     return jsonify(internships_data)
+
+
+@bp.route("/internships/delete_internship", methods=["DELETE"])
+@jwt_required()
+def delete_internship() -> Response:
+    """Delete internship endpoint."""
+    try:
+        internship_id = request.json["internship_id"]
+    except KeyError:
+        response = {"message": "Invalid request body"}
+        return make_response(jsonify(response), 400)
+
+    user_id = get_jwt_identity()
+
+    role_id = UserService.get_user_by_id(user_id).role_id
+
+    is_admin = role_id == 1
+
+    internship = InternshipService.get_internship(internship_id)
+    if (internship.author_id != user_id) and (is_admin is False):
+        response = {"message": "User not authorized to delete this internship"}
+        return make_response(jsonify(response), 401)
+
+    InternshipService.delete_internship(internship_id)
+
+    response = {"message": "Internship deleted successfully"}
+    return make_response(jsonify(response), 200)

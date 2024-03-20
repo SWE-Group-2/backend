@@ -30,3 +30,8 @@ class UserService:
     def get_user_by_username(username: str) -> Users:
         """Return a user by username."""
         return Users.query.filter_by(username=username).first()
+
+    @staticmethod
+    def get_user_by_id(user_id: int) -> Users:
+        """Return a user by id."""
+        return Users.query.get(user_id)
