@@ -72,3 +72,15 @@ def register() -> Response:
 
     response = {"message": "User created successfully"}
     return make_response(jsonify(response), 201)
+
+
+@bp.route("/users/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_user(user_id: int) -> Response:
+    """Return a user by id."""
+    user = UserService.get_user_by_id(user_id)
+    if user is None:
+        response = {"message": "User not found"}
+        return make_response(jsonify(response), 404)
+
+    return jsonify(user.to_dict())
