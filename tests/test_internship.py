@@ -4,6 +4,15 @@ from flask.testing import FlaskClient
 
 from src.app import db
 from src.app.models.internships import Internships
+from tests.conftest import EndpointEnum
+
+
+def get_token(test_client: FlaskClient) -> str:
+    """Get the token for the admin user."""
+    response = test_client.post(
+        EndpointEnum.login.value, json={"username": "admin", "password": "hardpass"}
+    )
+    return response.json["access_token"]
 
 
 def test_add_internship(test_client: FlaskClient, session: db.session) -> None:
@@ -90,3 +99,60 @@ def test_view_internship_dne(test_client: FlaskClient, session: db.session) -> N
 
     assert response.status_code == 404
     assert response.json == {"message": "Internship not found"}
+
+
+def test_update_internship(test_client: FlaskClient, session: db.session) -> None:
+    """Test the update internship endpoint."""
+    data = {
+        "company": "Baller company",
+        "position": "Baller",
+        "website": "www.baller.com",
+        "deadline": "2025-01-01",
+        "time_period_id": 1,
+        "company_photo_link": "www.baller.com/photo.jpg",
+        "flagged": False,
+    }
+    response = test_client.put(
+        "/internships/1",
+        json=data,
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 200
+    assert response.json == {"message": "Internship updated successfully"}
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+    assert internship.company == "Baller company"
+    assert internship.position == "Baller"
+    assert internship.website == "www.baller.com"
+    assert internship.deadline == datetime.strptime("2025-01-01", "%Y-%m-%d").date()
+    assert internship.time_period_id == 1
+    assert internship.flagged is False
+
+
+def test_update_other_user_internship(
+    test_client: FlaskClient, session: db.session
+) -> None:
+    """Test the update internship endpoint with an unauthorized user."""
+    new_internship = Internships(
+        company="User 2's company",
+        position="facility manager",
+        website="www.test.com",
+        deadline=datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+        author_id=2,
+        time_period_id=1,
+        company_photo_link="www.test.com",
+        flagged=False,
+        created_at=datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+    )
+    session.add(new_internship)
+    session.commit()
+
+    data = {
+        "company": "USER 1'S AWESOME COMPANY",
+    }
+    response = test_client.put(
+        "/internships/2",
+        json=data,
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 401
+    assert response.json == {"message": "Unauthorized"}
