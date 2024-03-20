@@ -2,6 +2,7 @@
 from datetime import datetime
 
 from flask import Response, jsonify, make_response, request
+from flask_jwt_extended import jwt_required
 
 from src.app.internship import bp
 from src.app.services.internship_service import InternshipService
@@ -61,8 +62,8 @@ def get_internships() -> Response:
     return jsonify(internships_data)
 
 
-@bp.route("/internships/<internship_id>", methods=["GET"])
-def view_internship(internship_id: str) -> Response:
+@bp.route("/internships/<int:internship_id>", methods=["GET"])
+def view_internship(internship_id: int) -> Response:
     """Return internship information."""
     internship = InternshipService.get_internship(internship_id)
 
@@ -87,6 +88,7 @@ def view_internship(internship_id: str) -> Response:
 
 
 @bp.route("/internships/{internship_id}", methods=["PUT"])
+@jwt_required()
 def update_internship(internship_id: int) -> Response:
     """Return example text for the update internship endpoint."""
     try:

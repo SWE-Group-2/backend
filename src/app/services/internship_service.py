@@ -63,6 +63,6 @@ class InternshipService:
         return Internships.query.all()
 
     @staticmethod
-    def get_internship(internship_id: str) -> Internships:
+    def get_internship(internship_id: int) -> Internships:
         """Return an internship."""
         return Internships.query.filter(Internships.id == internship_id).first()
