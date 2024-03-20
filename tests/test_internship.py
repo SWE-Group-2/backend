@@ -48,6 +48,7 @@ def test_get_internships(test_client: FlaskClient, session: db.session) -> None:
     internship = session.query(Internships).first()
     internship_json = [
         {
+            "id": internship.id,
             "company": internship.company,
             "position": internship.position,
             "website": internship.website,
@@ -69,6 +70,7 @@ def test_view_internship(test_client: FlaskClient, session: db.session) -> None:
     internship = session.query(Internships).filter(Internships.id == 1).first()
 
     assert response.status_code == 200
+    assert response.json["id"] == 1
     assert response.json["company"] == internship.company
     assert response.json["position"] == internship.position
     assert response.json["website"] == internship.website
