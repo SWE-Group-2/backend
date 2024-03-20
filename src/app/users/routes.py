@@ -83,4 +83,22 @@ def get_user(user_id: int) -> Response:
         response = {"message": "User not found"}
         return make_response(jsonify(response), 404)
 
-    return jsonify(user.to_dict())
+    user_json = {
+        "id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "username": user.username,
+        "gpa": user.gpa,
+        "academic_year": user.academic_year,
+        "github_link": user.github_link,
+        "linkedin_link": user.linkedin_link,
+        "website_link": user.website_link,
+        "profile_picture_link": user.profile_picture_link,
+        "email": user.email,
+        "phone_number": user.phone_number,
+        "description": user.description,
+        "role_id": user.role_id,
+        "internship_time_period_id": user.internship_time_period_id,
+    }
+
+    return jsonify(user_json)
