@@ -2,7 +2,7 @@
 from datetime import datetime
 
 from flask import Response, jsonify, make_response, request
-from flask_jwt_extended import jwt_required
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.internship import bp
 from src.app.services.internship_service import InternshipService
@@ -87,31 +87,40 @@ def view_internship(internship_id: int) -> Response:
     return jsonify(internships_data)
 
 
-@bp.route("/internships/{internship_id}", methods=["PUT"])
+@bp.route("/internships/<int:internship_id>", methods=["PUT"])
 @jwt_required()
 def update_internship(internship_id: int) -> Response:
     """Return example text for the update internship endpoint."""
-    try:
-        company = request.json["company"]
-        position = request.json["position"]
-        website = request.json["website"]
-        deadline = datetime.strptime(request.json["deadline"], "%Y-%m-%d")
-        time_period_id = request.json["time_period_id"]
-        company_photo_link = request.json.get("company_photo_link")
-        flagged = request.json["flagged"]
-    except KeyError:
-        response = {"message": "Invalid request body"}
-        return make_response(jsonify(response), 400)
+    internship = InternshipService.get_internship(internship_id)
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+    elif internship.author_id != get_jwt_identity():
+        response = {"message": "Unauthorized"}
+        return make_response(jsonify(response), 401)
+
+    company = request.json.get("company", internship.company)
+    position = request.json.get("position", internship.position)
+    website = request.json.get("website", internship.website)
+    deadline = datetime.strptime(
+        request.json.get("deadline", str(internship.deadline)), "%Y-%m-%d"
+    )
+    time_period_id = request.json.get("time_period_id", internship.time_period_id)
+    company_photo_link = request.json.get(
+        "company_photo_link", internship.company_photo_link
+    )
+    flagged = request.json.get("flagged", internship.flagged)
 
     InternshipService.update_internship_by_id(
-        internship_id,
-        company,
-        position,
-        website,
-        deadline,
-        time_period_id,
-        company_photo_link,
-        flagged,
+        internship_id=internship_id,
+        company=company,
+        position=position,
+        website=website,
+        deadline=deadline,
+        time_period_id=time_period_id,
+        company_photo_link=company_photo_link,
+        flagged=flagged,
     )
 
     response = {"message": "Internship updated successfully"}
