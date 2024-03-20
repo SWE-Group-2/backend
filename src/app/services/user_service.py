@@ -1,4 +1,3 @@
-from src.app import PasswordHasher
 from src.app.extensions import db
 from src.app.models.users import Users
 
@@ -19,7 +18,7 @@ class UserService:
             first_name=first_name,
             last_name=last_name,
             username=username,
-            password=PasswordHasher.hash_password(password),
+            password=password,
             role_id=role_id,
         )
         db.session.add(user)
