@@ -61,3 +61,30 @@ def test_get_internships(test_client: FlaskClient, session: db.session) -> None:
     ]
     assert response.status_code == 200
     assert response.json == internship_json
+
+
+def test_view_internship(test_client: FlaskClient, session: db.session) -> None:
+    """Test the view internship endpoint with invalid internship id."""
+    response = test_client.get("/internships/1")
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+
+    assert response.status_code == 200
+    assert response.json["company"] == internship.company
+    assert response.json["position"] == internship.position
+    assert response.json["website"] == internship.website
+    assert response.json["deadline"] == internship.deadline.strftime("%Y-%m-%d")
+    assert response.json["author_id"] == internship.author_id
+    assert response.json["time_period_id"] == internship.time_period_id
+    assert response.json["company_photo_link"] == internship.company_photo_link
+    assert response.json["flagged"] == internship.flagged
+    assert response.json["created_at"] == internship.created_at.strftime(
+        "%Y-%m-%d %H:%M:%S"
+    )
+
+
+def test_view_internship_dne(test_client: FlaskClient, session: db.session) -> None:
+    """Test the view internship endpoint."""
+    response = test_client.get("/internships/0")
+
+    assert response.status_code == 404
+    assert response.json == {"message": "Internship not found"}
