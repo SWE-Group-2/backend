@@ -65,7 +65,7 @@ def test_get_internships(test_client: FlaskClient, session: db.session) -> None:
 
 
 def test_view_internship(test_client: FlaskClient, session: db.session) -> None:
-    """Test the view internship endpoint with invalid internship id."""
+    """Test the view internship endpoint."""
     response = test_client.get("/internships/1")
     internship = session.query(Internships).filter(Internships.id == 1).first()
 
@@ -85,7 +85,7 @@ def test_view_internship(test_client: FlaskClient, session: db.session) -> None:
 
 
 def test_view_internship_dne(test_client: FlaskClient, session: db.session) -> None:
-    """Test the view internship endpoint."""
+    """Test the view internship endpoint with invalid internship id."""
     response = test_client.get("/internships/0")
 
     assert response.status_code == 404
