@@ -46,22 +46,22 @@ def test_get_internships(test_client: FlaskClient, session: db.session) -> None:
     """Test the get internships endpoint."""
     response = test_client.get("/internships")
     internship = session.query(Internships).first()
-    internship_json = [
-        {
-            "id": internship.id,
-            "company": internship.company,
-            "position": internship.position,
-            "website": internship.website,
-            "deadline": internship.deadline.strftime("%Y-%m-%d"),
-            "author_id": internship.author_id,
-            "time_period_id": internship.time_period_id,
-            "company_photo_link": internship.company_photo_link,
-            "flagged": internship.flagged,
-            "created_at": internship.created_at.strftime("%Y-%m-%d %H:%M:%S"),
-        }
-    ]
+    internship_json = {
+        "id": internship.id,
+        "company": internship.company,
+        "position": internship.position,
+        "website": internship.website,
+        "deadline": internship.deadline.strftime("%Y-%m-%d"),
+        "author_id": internship.author_id,
+        "time_period_id": internship.time_period_id,
+        "company_photo_link": internship.company_photo_link,
+        "flagged": internship.flagged,
+        "created_at": internship.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    print(response.json[0])
+    print(internship_json)
     assert response.status_code == 200
-    assert response.json == internship_json
+    assert response.json[0] == internship_json
 
 
 def test_view_internship(test_client: FlaskClient, session: db.session) -> None:

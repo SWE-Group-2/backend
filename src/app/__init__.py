@@ -66,10 +66,9 @@ def create_app(config: Optional = Config) -> Flask:
             db.session.add(time_period)
             db.session.commit()
 
-        # prepopulate with internship data for testing, does not work cuz of foreign key
         if Internships.query.count() == 0:
             print("Initializing internships")
-            internship = Internships(
+            internship1 = Internships(
                 company="test company",
                 position="facility manager",
                 website="www.test.com",
@@ -80,7 +79,19 @@ def create_app(config: Optional = Config) -> Flask:
                 flagged=False,
                 created_at=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
             )
-            db.session.add(internship)
+            internship2 = Internships(
+                company="piti company",
+                position="head of heads",
+                website="www.pititi.com",
+                deadline=datetime.datetime.strptime("2021-11-02", "%Y-%m-%d").date(),
+                author_id=1,
+                time_period_id=1,
+                company_photo_link="www.pititi.com",
+                flagged=False,
+                created_at=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+            )
+            db.session.add(internship2)
+            db.session.add(internship1)
 
         db.session.commit()
 
