@@ -100,17 +100,16 @@ def update_internship(internship_id: int) -> Response:
         response = {"message": "Unauthorized"}
         return make_response(jsonify(response), 401)
 
-    company = request.json.get("company", internship.company)
-    position = request.json.get("position", internship.position)
-    website = request.json.get("website", internship.website)
-    deadline = datetime.strptime(
-        request.json.get("deadline", str(internship.deadline)), "%Y-%m-%d"
-    )
-    time_period_id = request.json.get("time_period_id", internship.time_period_id)
-    company_photo_link = request.json.get(
-        "company_photo_link", internship.company_photo_link
-    )
-    flagged = request.json.get("flagged", internship.flagged)
+    try:
+        company = request.json["company"]
+        position = request.json["position"]
+        website = request.json["website"]
+        deadline = datetime.strptime(request.json["deadline"], "%Y-%m-%d")
+        time_period_id = request.json["time_period_id"]
+        company_photo_link = request.json.get("company_photo_link")
+    except KeyError:
+        response = {"message": "Invalid request body"}
+        return make_response(jsonify(response), 400)
 
     InternshipService.update_internship_by_id(
         internship_id=internship_id,
@@ -120,7 +119,6 @@ def update_internship(internship_id: int) -> Response:
         deadline=deadline,
         time_period_id=time_period_id,
         company_photo_link=company_photo_link,
-        flagged=flagged,
     )
 
     response = {"message": "Internship updated successfully"}

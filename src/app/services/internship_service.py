@@ -42,7 +42,6 @@ class InternshipService:
         deadline: datetime.date,
         time_period_id: int,
         company_photo_link: str,
-        flagged: bool = False,
     ) -> Internships:
         """Update an internship by its id."""
         internship = Internships.query.filter(Internships.id == internship_id).first()
@@ -52,7 +51,6 @@ class InternshipService:
         internship.deadline = deadline
         internship.time_period_id = time_period_id
         internship.company_photo_link = company_photo_link
-        internship.flagged = flagged
 
         db.session.commit()
         return internship
