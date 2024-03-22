@@ -23,6 +23,8 @@ class TimePeriodService:
         return TimePeriods.query.all()
 
     @staticmethod
-    def get_time_period(time_period_id: int) -> TimePeriods:
-        """Return a time period."""
-        return TimePeriods.query.filter(TimePeriods.id == time_period_id).first()
+    def get_valid_time_periods() -> list[TimePeriods]:
+        """Return all valid time periods."""
+        return TimePeriods.query.filter(
+            TimePeriods.start_date > datetime.date.today()
+        ).all()
