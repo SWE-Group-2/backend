@@ -110,7 +110,6 @@ def test_update_internship(test_client: FlaskClient, session: db.session) -> Non
         "deadline": "2025-01-01",
         "time_period_id": 1,
         "company_photo_link": "www.baller.com/photo.jpg",
-        "flagged": False,
     }
     response = test_client.put(
         "/internships/1",
@@ -125,7 +124,6 @@ def test_update_internship(test_client: FlaskClient, session: db.session) -> Non
     assert internship.website == "www.baller.com"
     assert internship.deadline == datetime.strptime("2025-01-01", "%Y-%m-%d").date()
     assert internship.time_period_id == 1
-    assert internship.flagged is False
 
 
 def test_update_other_user_internship(
@@ -156,3 +154,17 @@ def test_update_other_user_internship(
     )
     assert response.status_code == 401
     assert response.json == {"message": "Unauthorized"}
+
+
+def test_update_internship_invalid_request(test_client: FlaskClient) -> None:
+    data = {
+        "company_name": "Baller company",
+    }
+    response = test_client.put(
+        "/internships/1",
+        json=data,
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+
+    assert response.status_code == 400
+    assert response.json == {"message": "Invalid request body"}
