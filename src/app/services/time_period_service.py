@@ -4,8 +4,8 @@ from src.app.extensions import db
 from src.app.models.time_periods import TimePeriods
 
 
-class AdminService:
-    """Service for Admin related tasks."""
+class TimePeriodService:
+    """Service for Time Period related tasks."""
 
     @staticmethod
     def create_time_period(
@@ -16,3 +16,13 @@ class AdminService:
         db.session.add(time_period)
         db.session.commit()
         return time_period
+
+    @staticmethod
+    def get_time_periods() -> list[TimePeriods]:
+        """Return all time periods."""
+        return TimePeriods.query.all()
+
+    @staticmethod
+    def get_time_period(time_period_id: int) -> TimePeriods:
+        """Return a time period."""
+        return TimePeriods.query.filter(TimePeriods.id == time_period_id).first()
