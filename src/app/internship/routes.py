@@ -2,20 +2,21 @@
 from datetime import datetime
 
 from flask import Response, jsonify, make_response, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.internship import bp
 from src.app.services.internship_service import InternshipService
 
 
 @bp.route("/internships/add_internship", methods=["POST"])
+@jwt_required()
 def add_internship() -> Response:
-    """Return example text for the add internship endpoint."""
+    """Create a new internship."""
     try:
         company = request.json["company"]
         position = request.json["position"]
         website = request.json["website"]
         deadline = datetime.strptime(request.json["deadline"], "%Y-%m-%d")
-        author_id = request.json["author_id"]
         time_period_id = request.json["time_period_id"]
         company_photo_link = request.json.get("company_photo_link")
     except KeyError:
@@ -23,13 +24,13 @@ def add_internship() -> Response:
         return make_response(jsonify(response), 400)
 
     InternshipService.create_internship(
-        company,
-        position,
-        website,
-        deadline,
-        author_id,
-        time_period_id,
-        company_photo_link,
+        company=company,
+        position=position,
+        website=website,
+        deadline=deadline,
+        author_id=get_jwt_identity(),
+        time_period_id=time_period_id,
+        company_photo_link=company_photo_link,
     )
 
     response = {"message": "Internship created successfully"}
@@ -62,6 +63,7 @@ def get_internships() -> Response:
 
 
 @bp.route("/internships/<internship_id>", methods=["GET"])
+@jwt_required()
 def view_internship(internship_id: str) -> Response:
     """Return internship information."""
     internship = InternshipService.get_internship(internship_id)
