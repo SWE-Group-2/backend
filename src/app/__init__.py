@@ -112,4 +112,8 @@ def create_app(config: Optional = Config) -> Flask:
 
     app.register_blueprint(admin_blueprint)
 
+    from src.app.time_periods import bp as time_periods_blueprint
+
+    app.register_blueprint(time_periods_blueprint)
+
     return app
