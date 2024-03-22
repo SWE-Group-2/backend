@@ -59,9 +59,9 @@ def create_app(config: Optional = Config) -> Flask:
         if TimePeriods.query.count() == 0:
             print("Initializing time periods")
             time_period = TimePeriods(
-                name="Fall 2021",
-                start_date=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
-                end_date=datetime.datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+                name="T3 2023-2024",
+                start_date=datetime.datetime.strptime("2024-04-22", "%Y-%m-%d").date(),
+                end_date=datetime.datetime.strptime("2024-07-21", "%Y-%m-%d").date(),
             )
             db.session.add(time_period)
             db.session.commit()
