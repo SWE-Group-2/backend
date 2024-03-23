@@ -29,6 +29,7 @@ class EndpointEnum(enum.Enum):
     get_current_user = "/users/get_current_user"
     get_user = "/users/{user_id}"
     register = "/users/register"
+    update_internship = "/internships/{internship_id}"
 
 
 @pytest.fixture(scope="session")
