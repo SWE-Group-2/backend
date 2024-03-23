@@ -163,10 +163,15 @@ def test_update_other_user_internship(
     session.commit()
 
     data = {
-        "company": "USER 1'S AWESOME COMPANY",
+        "company": "USER 2'S BALLER COMPANY",
+        "position": "Baller",
+        "website": "www.baller.com",
+        "deadline": "2025-01-01",
+        "time_period_id": 1,
+        "company_photo_link": "www.baller.com/photo.jpg",
     }
     response = test_client.put(
-        "/internships/2",
+        f"/internships/{new_internship.id}",
         json=data,
         headers={"Authorization": f"Bearer {get_token(test_client)}"},
     )
