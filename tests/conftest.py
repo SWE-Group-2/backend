@@ -5,6 +5,7 @@ import typing
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
+from flask_jwt_extended import create_access_token
 
 from src.app import create_app
 from src.app.extensions import db
@@ -75,3 +76,8 @@ def session(test_db: db, request: pytest.FixtureRequest) -> db.session:
 
     request.addfinalizer(teardown)
     return db.session
+
+
+@pytest.fixture(scope="function")
+def access_token() -> str:
+    return create_access_token(identity=1)

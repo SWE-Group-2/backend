@@ -15,7 +15,9 @@ def get_token(test_client: FlaskClient) -> str:
     return response.json["access_token"]
 
 
-def test_add_internship(test_client: FlaskClient, session: db.session) -> None:
+def test_add_internship(
+    test_client: FlaskClient, session: db.session, access_token: str
+) -> None:
     """Test the add internship endpoint."""
     data = {
         "company": "Test Company",
@@ -25,7 +27,11 @@ def test_add_internship(test_client: FlaskClient, session: db.session) -> None:
         "author_id": 1,
         "time_period_id": 1,
     }
-    response = test_client.post("/internships/add_internship", json=data)
+    response = test_client.post(
+        "/internships/add_internship",
+        json=data,
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
     assert response.status_code == 201
     assert response.json == {"message": "Internship created successfully"}
     internship = (
@@ -41,12 +47,18 @@ def test_add_internship(test_client: FlaskClient, session: db.session) -> None:
     assert internship.created_at is not None
 
 
-def test_add_internship_invalid_request(test_client: FlaskClient) -> None:
+def test_add_internship_invalid_request(
+    test_client: FlaskClient, access_token: str
+) -> None:
     """Test the add internship endpoint with an invalid request."""
     data = {
         "Joe": "Mama",
     }
-    response = test_client.post("/internships/add_internship", json=data)
+    response = test_client.post(
+        "/internships/add_internship",
+        json=data,
+        headers={"Authorization": f"Bearer {access_token}"},
+    )
     assert response.status_code == 400
     assert response.json == {"message": "Invalid request body"}
 
@@ -67,15 +79,17 @@ def test_get_internships(test_client: FlaskClient, session: db.session) -> None:
         "flagged": internship.flagged,
         "created_at": internship.created_at.strftime("%Y-%m-%d %H:%M:%S"),
     }
-    print(response.json[0])
-    print(internship_json)
     assert response.status_code == 200
     assert response.json[0] == internship_json
 
 
-def test_view_internship(test_client: FlaskClient, session: db.session) -> None:
+def test_view_internship(
+    test_client: FlaskClient, session: db.session, access_token: str
+) -> None:
     """Test the view internship endpoint with invalid internship id."""
-    response = test_client.get("/internships/1")
+    response = test_client.get(
+        "/internships/1", headers={"Authorization": f"Bearer {access_token}"}
+    )
     internship = session.query(Internships).filter(Internships.id == 1).first()
 
     assert response.status_code == 200
@@ -93,9 +107,13 @@ def test_view_internship(test_client: FlaskClient, session: db.session) -> None:
     )
 
 
-def test_view_internship_dne(test_client: FlaskClient, session: db.session) -> None:
+def test_view_internship_dne(
+    test_client: FlaskClient, session: db.session, access_token: str
+) -> None:
     """Test the view internship endpoint."""
-    response = test_client.get("/internships/0")
+    response = test_client.get(
+        "/internships/0", headers={"Authorization": f"Bearer {access_token}"}
+    )
 
     assert response.status_code == 404
     assert response.json == {"message": "Internship not found"}
@@ -145,10 +163,15 @@ def test_update_other_user_internship(
     session.commit()
 
     data = {
-        "company": "USER 1'S AWESOME COMPANY",
+        "company": "USER 2'S BALLER COMPANY",
+        "position": "Baller",
+        "website": "www.baller.com",
+        "deadline": "2025-01-01",
+        "time_period_id": 1,
+        "company_photo_link": "www.baller.com/photo.jpg",
     }
     response = test_client.put(
-        "/internships/2",
+        f"/internships/{new_internship.id}",
         json=data,
         headers={"Authorization": f"Bearer {get_token(test_client)}"},
     )
