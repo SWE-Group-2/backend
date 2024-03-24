@@ -123,3 +123,22 @@ def update_internship(internship_id: int) -> Response:
 
     response = {"message": "Internship updated successfully"}
     return make_response(jsonify(response), 200)
+
+
+@bp.route("/internships/<int:internship_id>", methods=["DELETE"])
+@jwt_required()
+def delete_internship(internship_id: int) -> Response:
+    """Delete an internship."""
+    internship = InternshipService.get_internship(internship_id)
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+    elif internship.author_id != get_jwt_identity():
+        response = {"message": "Unauthorized"}
+        return make_response(jsonify(response), 401)
+
+    InternshipService.delete_internship_by_id(internship_id=internship_id)
+
+    response = {"message": "Internship deleted successfully"}
+    return make_response(jsonify(response), 200)

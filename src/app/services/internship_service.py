@@ -66,3 +66,10 @@ class InternshipService:
     def get_internship(internship_id: int) -> Internships:
         """Return an internship."""
         return Internships.query.filter(Internships.id == internship_id).first()
+
+    @staticmethod
+    def delete_internship_by_id(internship_id: int) -> None:
+        """Delete an internship by its id."""
+        internship = Internships.query.filter(Internships.id == internship_id).first()
+        db.session.delete(internship)
+        db.session.commit()
