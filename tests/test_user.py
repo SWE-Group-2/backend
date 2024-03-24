@@ -123,3 +123,16 @@ def test_get_user_by_id_user_not_found(test_client: FlaskClient) -> None:
     )
     assert response.status_code == 404
     assert response.json == {"message": "User not found"}
+
+
+def test_get_all_users(test_client: FlaskClient) -> None:
+    """Test the get all users endpoint."""
+    response = test_client.get(
+        EndpointEnum.get_all_users.value,
+    )
+    assert response.status_code == 200
+    admin = response.json[0]
+    assert admin["id"] == 1
+    assert admin["username"] == "admin"
+    assert admin["role_id"] == RoleEnum.admin.value
+    assert len(response.json) == 1
