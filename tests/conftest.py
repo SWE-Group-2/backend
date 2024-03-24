@@ -28,6 +28,7 @@ class EndpointEnum(enum.Enum):
 
     login = "/users/login"
     get_current_user = "/users/get_current_user"
+    get_all_users = "/users"
     get_user = "/users/{user_id}"
     register = "/users/register"
     update_internship = "/internships/{internship_id}"

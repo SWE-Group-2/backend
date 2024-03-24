@@ -74,6 +74,34 @@ def register() -> Response:
     return make_response(jsonify(response), 201)
 
 
+@bp.route("/users", methods=["GET"])
+def get_all_users() -> Response:
+    """Return all users."""
+    users = UserService.get_all_users()
+    users_json = [
+        {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "username": user.username,
+            "gpa": user.gpa,
+            "academic_year": user.academic_year,
+            "github_link": user.github_link,
+            "linkedin_link": user.linkedin_link,
+            "website_link": user.website_link,
+            "profile_picture_link": user.profile_picture_link,
+            "email": user.email,
+            "phone_number": user.phone_number,
+            "description": user.description,
+            "role_id": user.role_id,
+            "internship_time_period_id": user.internship_time_period_id,
+        }
+        for user in users
+    ]
+
+    return jsonify(users_json)
+
+
 @bp.route("/users/<int:user_id>", methods=["GET"])
 @jwt_required()
 def get_user(user_id: int) -> Response:
