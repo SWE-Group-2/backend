@@ -191,3 +191,49 @@ def test_update_internship_invalid_request(test_client: FlaskClient) -> None:
 
     assert response.status_code == 400
     assert response.json == {"message": "Invalid request body"}
+
+
+def test_delete_internship(test_client: FlaskClient, session: db.session) -> None:
+    """Test the delete internship endpoint."""
+    response = test_client.delete(
+        "/internships/1", headers={"Authorization": f"Bearer {get_token(test_client)}"}
+    )
+    assert response.status_code == 200
+    assert response.json == {"message": "Internship deleted successfully"}
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+    assert internship is None
+
+
+def test_delete_internship_dne(test_client: FlaskClient, session: db.session) -> None:
+    """Test the delete internship endpoint."""
+    response = test_client.delete(
+        "/internships/0", headers={"Authorization": f"Bearer {get_token(test_client)}"}
+    )
+    assert response.status_code == 404
+    assert response.json == {"message": "Internship not found"}
+
+
+def test_delete_other_user_internship(
+    test_client: FlaskClient, session: db.session
+) -> None:
+    """Test the delete internship endpoint."""
+    new_internship = Internships(
+        company="User 2's company",
+        position="facility manager",
+        website="www.test.com",
+        deadline=datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+        author_id=2,
+        time_period_id=1,
+        company_photo_link="www.test.com",
+        flagged=False,
+        created_at=datetime.strptime("2021-12-12", "%Y-%m-%d").date(),
+    )
+    session.add(new_internship)
+    session.commit()
+
+    response = test_client.delete(
+        f"/internships/{new_internship.id}",
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 401
+    assert response.json == {"message": "Unauthorized"}
