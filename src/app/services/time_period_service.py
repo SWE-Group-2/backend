@@ -28,3 +28,10 @@ class TimePeriodService:
         return TimePeriods.query.filter(
             TimePeriods.start_date > datetime.date.today()
         ).all()
+
+    @staticmethod
+    def delete_time_period_by_id(time_period_id: int) -> None:
+        """Delete a time period by id."""
+        time_period = TimePeriods.query.filter_by(id=time_period_id).first()
+        db.session.delete(time_period)
+        db.session.commit()
