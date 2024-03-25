@@ -32,6 +32,7 @@ class EndpointEnum(enum.Enum):
     get_user = "/users/{user_id}"
     register = "/users/register"
     update_internship = "/internships/{internship_id}"
+    add_time_period = "/admin/add_time_period"
 
 
 @pytest.fixture(scope="session")
@@ -80,5 +81,10 @@ def session(test_db: db, request: pytest.FixtureRequest) -> db.session:
 
 
 @pytest.fixture(scope="function")
-def access_token() -> str:
+def admin_access_token() -> str:
     return create_access_token(identity=1)
+
+
+@pytest.fixture(scope="function")
+def student_access_token() -> str:
+    return create_access_token(identity=2)

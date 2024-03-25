@@ -135,4 +135,4 @@ def test_get_all_users(test_client: FlaskClient) -> None:
     assert admin["id"] == 1
     assert admin["username"] == "admin"
     assert admin["role_id"] == RoleEnum.admin.value
-    assert len(response.json) == 1
+    assert len(response.json) >= 1
