@@ -16,7 +16,7 @@ def get_token(test_client: FlaskClient) -> str:
 
 
 def test_add_internship(
-    test_client: FlaskClient, session: db.session, access_token: str
+    test_client: FlaskClient, session: db.session, admin_access_token: str
 ) -> None:
     """Test the add internship endpoint."""
     data = {
@@ -30,7 +30,7 @@ def test_add_internship(
     response = test_client.post(
         "/internships/add_internship",
         json=data,
-        headers={"Authorization": f"Bearer {access_token}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
     )
     assert response.status_code == 201
     assert response.json == {"message": "Internship created successfully"}
@@ -48,7 +48,7 @@ def test_add_internship(
 
 
 def test_add_internship_invalid_request(
-    test_client: FlaskClient, access_token: str
+    test_client: FlaskClient, admin_access_token: str
 ) -> None:
     """Test the add internship endpoint with an invalid request."""
     data = {
@@ -57,7 +57,7 @@ def test_add_internship_invalid_request(
     response = test_client.post(
         "/internships/add_internship",
         json=data,
-        headers={"Authorization": f"Bearer {access_token}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
     )
     assert response.status_code == 400
     assert response.json == {"message": "Invalid request body"}
@@ -84,11 +84,11 @@ def test_get_internships(test_client: FlaskClient, session: db.session) -> None:
 
 
 def test_view_internship(
-    test_client: FlaskClient, session: db.session, access_token: str
+    test_client: FlaskClient, session: db.session, admin_access_token: str
 ) -> None:
     """Test the view internship endpoint with invalid internship id."""
     response = test_client.get(
-        "/internships/1", headers={"Authorization": f"Bearer {access_token}"}
+        "/internships/1", headers={"Authorization": f"Bearer {admin_access_token}"}
     )
     internship = session.query(Internships).filter(Internships.id == 1).first()
 
@@ -108,11 +108,11 @@ def test_view_internship(
 
 
 def test_view_internship_dne(
-    test_client: FlaskClient, session: db.session, access_token: str
+    test_client: FlaskClient, session: db.session, admin_access_token: str
 ) -> None:
     """Test the view internship endpoint."""
     response = test_client.get(
-        "/internships/0", headers={"Authorization": f"Bearer {access_token}"}
+        "/internships/0", headers={"Authorization": f"Bearer {admin_access_token}"}
     )
 
     assert response.status_code == 404
