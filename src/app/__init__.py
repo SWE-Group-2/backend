@@ -53,7 +53,13 @@ def create_app(config: Optional = Config) -> Flask:
                 password=PasswordHasher.hash_password(password="hardpass"),
                 role_id=1,
             )
+            student_user = Users(
+                username="student",
+                password=PasswordHasher.hash_password(password="hardpass"),
+                role_id=3,
+            )
             db.session.add(admin_user)
+            db.session.add(student_user)
             db.session.commit()
 
         if TimePeriods.query.count() == 0:

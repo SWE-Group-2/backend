@@ -8,7 +8,7 @@ class TimePeriodService:
     """Service for Time Period related tasks."""
 
     @staticmethod
-    def create_time_period(
+    def add_time_period(
         start_date: datetime.date, end_date: datetime.date, name: str
     ) -> TimePeriods:
         """Create a new time period."""
