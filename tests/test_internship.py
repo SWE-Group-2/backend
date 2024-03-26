@@ -23,7 +23,7 @@ def test_add_internship(
         "company": "Test Company",
         "position": "Facility manager",
         "website": "www.wirecard.com",
-        "deadline": "2023-01-01",
+        "deadline": "2069-01-01",
         "author_id": 1,
         "time_period_id": 1,
     }
@@ -40,11 +40,32 @@ def test_add_internship(
     assert internship.company == "Test Company"
     assert internship.position == "Facility manager"
     assert internship.website == "www.wirecard.com"
-    assert internship.deadline == datetime.strptime("2023-01-01", "%Y-%m-%d").date()
+    assert internship.deadline == datetime.strptime("2069-01-01", "%Y-%m-%d").date()
     assert internship.author_id == 1
     assert internship.time_period_id == 1
     assert internship.flagged is False
     assert internship.created_at is not None
+
+
+def test_add_internship_invalid_deadline(
+    test_client: FlaskClient, admin_access_token: str
+) -> None:
+    """Test the add internship endpoint with an invalid deadline."""
+    data = {
+        "company": "Test Company",
+        "position": "Facility manager",
+        "website": "www.wirecard.com",
+        "deadline": "2020-01-01",
+        "author_id": 1,
+        "time_period_id": 1,
+    }
+    response = test_client.post(
+        "/internships/add_internship",
+        json=data,
+        headers={"Authorization": f"Bearer {admin_access_token}"},
+    )
+    assert response.status_code == 400
+    assert response.json == {"message": "Deadline must be in the future"}
 
 
 def test_add_internship_invalid_request(

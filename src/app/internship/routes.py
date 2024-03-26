@@ -23,6 +23,10 @@ def add_internship() -> Response:
         response = {"message": "Invalid request body"}
         return make_response(jsonify(response), 400)
 
+    if deadline < datetime.now():
+        response = {"message": "Deadline must be in the future"}
+        return make_response(jsonify(response), 400)
+
     InternshipService.create_internship(
         company=company,
         position=position,
