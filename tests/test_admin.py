@@ -2,6 +2,7 @@ from flask.testing import FlaskClient
 
 from src.app import db
 from src.app.models.roles import RoleEnum
+from src.app.models.time_periods import TimePeriods
 from src.app.models.users import Users
 from tests.conftest import EndpointEnum
 
@@ -176,6 +177,55 @@ def test_change_role_non_admin(
         "/admin/change_role/mynameisjeff",
         headers={"Authorization": f"Bearer {student_access_token}"},
         json=data,
+    )
+    assert response.status_code == 401
+    assert response.json == {"message": "Unauthorized"}
+
+
+def test_delete_time_period(
+    test_client: FlaskClient, session: db.session, admin_access_token: str
+) -> None:
+    """Test the delete time period endpoint."""
+    data = {
+        "start_date": "2024-08-01",
+        "end_date": "2024-08-31",
+        "name": "August 2024",
+    }
+    test_client.post(
+        EndpointEnum.add_time_period.value,
+        headers={"Authorization": f"Bearer {admin_access_token}"},
+        json=data,
+    )
+
+    response = test_client.delete(
+        "/admin/delete_time_period/1",
+        headers={"Authorization": f"Bearer {admin_access_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json == {"message": "Time period deleted successfully"}
+    time_period = session.query(TimePeriods).filter(TimePeriods.id == 1).first()
+    assert time_period is None
+
+
+def test_delete_time_period_invalid_request(
+    test_client: FlaskClient, admin_access_token: str
+) -> None:
+    """Test the delete time period endpoint with an invalid request."""
+    response = test_client.delete(
+        "/admin/delete_time_period/0",
+        headers={"Authorization": f"Bearer {admin_access_token}"},
+    )
+    assert response.status_code == 404
+    assert response.json == {"message": "Time period not found"}
+
+
+def test_delete_time_period_non_admin(
+    test_client: FlaskClient, session: db.session, student_access_token: str
+) -> None:
+    """Test the delete time period endpoint with a non-admin user."""
+    response = test_client.delete(
+        "/admin/delete_time_period/1",
+        headers={"Authorization": f"Bearer {student_access_token}"},
     )
     assert response.status_code == 401
     assert response.json == {"message": "Unauthorized"}

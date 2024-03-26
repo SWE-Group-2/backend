@@ -3,6 +3,7 @@ import datetime
 
 from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy.orm.exc import UnmappedInstanceError
 
 from src.app.admin import bp
 from src.app.models.roles import RoleEnum
@@ -83,4 +84,22 @@ def change_role(username: str) -> Response:
 
     AdminService.change_user_role_by_username(username, role_id)
     response = {"message": "Role changed successfully"}
+    return make_response(jsonify(response), 200)
+
+
+@bp.route("/admin/delete_time_period/<int:time_period_id>", methods=["DELETE"])
+@jwt_required()
+def delete_time_period(time_period_id: int) -> Response:
+    """Delete a time period."""
+    current_user = UserService.get_user_by_id(get_jwt_identity())
+
+    if current_user.role_id != RoleEnum.admin.value:
+        response = {"message": "Unauthorized"}
+        return make_response(jsonify(response), 401)
+    try:
+        TimePeriodService.delete_time_period_by_id(time_period_id)
+    except UnmappedInstanceError:
+        response = {"message": "Time period not found"}
+        return make_response(jsonify(response), 404)
+    response = {"message": "Time period deleted successfully"}
     return make_response(jsonify(response), 200)
