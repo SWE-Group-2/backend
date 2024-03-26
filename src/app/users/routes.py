@@ -102,6 +102,34 @@ def get_all_users() -> Response:
     return jsonify(users_json)
 
 
+@bp.route("/users/students", methods=["GET"])
+def get_all_students() -> Response:
+    """Return all students."""
+    students = UserService.get_all_students()
+    students_json = [
+        {
+            "id": student.id,
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "username": student.username,
+            "gpa": student.gpa,
+            "academic_year": student.academic_year,
+            "github_link": student.github_link,
+            "linkedin_link": student.linkedin_link,
+            "website_link": student.website_link,
+            "profile_picture_link": student.profile_picture_link,
+            "email": student.email,
+            "phone_number": student.phone_number,
+            "description": student.description,
+            "role_id": student.role_id,
+            "internship_time_period_id": student.internship_time_period_id,
+        }
+        for student in students
+    ]
+
+    return jsonify(students_json)
+
+
 @bp.route("/users/<int:user_id>", methods=["GET"])
 @jwt_required()
 def get_user(user_id: int) -> Response:
