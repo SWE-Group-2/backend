@@ -63,12 +63,12 @@ def add_time_period() -> Response:
     return make_response(jsonify(response), 201)
 
 
-@bp.route("/admin/change_role/<int:user_id>", methods=["PUT"])
+@bp.route("/admin/change_role/<string:username>", methods=["PUT"])
 @jwt_required()
-def change_role(user_id: int) -> Response:
+def change_role(username: str) -> Response:
     """Change the role of a user."""
     current_user = UserService.get_user_by_id(get_jwt_identity())
-    user = UserService.get_user_by_id(user_id)
+    user = UserService.get_user_by_username(username)
     if user is None:
         response = {"message": "User not found"}
         return make_response(jsonify(response), 404)
@@ -82,7 +82,7 @@ def change_role(user_id: int) -> Response:
         response = {"message": "Invalid request body"}
         return make_response(jsonify(response), 400)
 
-    AdminService.change_user_role_by_id(user_id, role_id)
+    AdminService.change_user_role_by_username(username, role_id)
     response = {"message": "Role changed successfully"}
     return make_response(jsonify(response), 200)
 
