@@ -39,7 +39,7 @@ class UserService:
     @staticmethod
     def get_all_students() -> list[Users]:
         """Return all students."""
-        return Users.query.filter_by(role_id=RoleEnum.student).all()
+        return Users.query.filter_by(role_id=RoleEnum.student.value).all()
 
     @staticmethod
     def get_user_by_id(user_id: int) -> Users:
