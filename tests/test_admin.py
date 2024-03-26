@@ -119,7 +119,7 @@ def test_change_role(
     user = Users(
         first_name="Test",
         last_name="User",
-        username="testuser",
+        username="mynameisjeff",
         password="hardpass",
         role_id=RoleEnum.student.value,
     )
@@ -130,13 +130,13 @@ def test_change_role(
         "role_id": RoleEnum.admin.value,
     }
     response = test_client.put(
-        f"/admin/change_role/{user.id}",
+        "/admin/change_role/mynameisjeff",
         headers={"Authorization": f"Bearer {admin_access_token}"},
         json=data,
     )
     assert response.status_code == 200
     assert response.json == {"message": "Role changed successfully"}
-    user = session.query(Users).filter(Users.username == "testuser").first()
+    user = session.query(Users).filter(Users.username == "mynameisjeff").first()
     assert user.role_id == RoleEnum.admin.value
 
 
@@ -148,7 +148,7 @@ def test_change_role_invalid_request(
         "role_id": RoleEnum.admin.value,
     }
     response = test_client.put(
-        "/admin/change_role/0",
+        "/admin/change_role/thisisnotausername1257612401z5",
         headers={"Authorization": f"Bearer {admin_access_token}"},
         json=data,
     )
@@ -160,11 +160,20 @@ def test_change_role_non_admin(
     test_client: FlaskClient, session: db.session, student_access_token: str
 ) -> None:
     """Test the change role endpoint with a non-admin user."""
+    user = Users(
+        first_name="Test",
+        last_name="User",
+        username="mynameisjeff",
+        password="hardpass",
+        role_id=RoleEnum.student.value,
+    )
+    db.session.add(user)
+    db.session.commit()
     data = {
         "role_id": RoleEnum.admin.value,
     }
     response = test_client.put(
-        "/admin/change_role/1",
+        "/admin/change_role/mynameisjeff",
         headers={"Authorization": f"Bearer {student_access_token}"},
         json=data,
     )
