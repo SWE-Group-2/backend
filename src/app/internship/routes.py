@@ -6,6 +6,7 @@ from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.internship import bp
 from src.app.services.internship_service import InternshipService
+from src.app.services.user_service import UserService
 
 
 @bp.route("/internships/add_internship", methods=["POST"])
@@ -96,11 +97,12 @@ def view_internship(internship_id: int) -> Response:
 def update_internship(internship_id: int) -> Response:
     """Return example text for the update internship endpoint."""
     internship = InternshipService.get_internship(internship_id)
+    user = UserService.get_user_by_id(get_jwt_identity())
 
     if internship is None:
         response = {"message": "Internship not found"}
         return make_response(jsonify(response), 404)
-    elif internship.author_id != get_jwt_identity():
+    elif internship.author_id != user.id and user.role_id != 1:
         response = {"message": "Unauthorized"}
         return make_response(jsonify(response), 401)
 
@@ -134,7 +136,6 @@ def update_internship(internship_id: int) -> Response:
 def delete_internship(internship_id: int) -> Response:
     """Delete an internship."""
     internship = InternshipService.get_internship(internship_id)
-
     if internship is None:
         response = {"message": "Internship not found"}
         return make_response(jsonify(response), 404)
