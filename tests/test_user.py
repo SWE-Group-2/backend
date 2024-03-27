@@ -14,6 +14,8 @@ def get_token(test_client: FlaskClient) -> str:
         EndpointEnum.login.value, json={"username": "admin", "password": "hardpass"}
     )
     return response.json["access_token"]
+
+
 def get_admin_login() -> dict:
     return {"username": "admin", "password": "hardpass"}
 
@@ -28,11 +30,6 @@ def login_user(test_client: FlaskClient, data: dict) -> TestResponse:
     """Login the user."""
     response = test_client.post(EndpointEnum.login.value, json=data)
     return response
-
-
-def get_token(test_client: FlaskClient, data: dict) -> str:
-    """Get the token for a user."""
-    return login_user(test_client, data).json["access_token"]
 
 
 def test_login(test_client: FlaskClient, session: db.session) -> None:
@@ -157,6 +154,8 @@ def test_get_all_users(test_client: FlaskClient) -> None:
     assert admin["username"] == "admin"
     assert admin["role_id"] == RoleEnum.admin.value
     assert len(response.json) >= 1
+
+
 def test_update_user(test_client: FlaskClient, session: db.session) -> None:
     """Test the update user endpoint."""
     # Update all fields

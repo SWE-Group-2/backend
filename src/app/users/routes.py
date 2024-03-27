@@ -158,6 +158,8 @@ def get_user(user_id: int) -> Response:
     }
 
     return jsonify(user_json)
+
+
 @bp.route("/users/edit_profile", methods=["PUT"])
 @jwt_required()
 def edit_user_profile() -> Response:
