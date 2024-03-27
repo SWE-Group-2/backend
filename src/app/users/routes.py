@@ -72,3 +72,57 @@ def register() -> Response:
 
     response = {"message": "User created successfully"}
     return make_response(jsonify(response), 201)
+
+
+@bp.route("/users/edit_profile", methods=["PUT"])
+@jwt_required()
+def edit_user_profile() -> Response:
+    """Edit the user profile."""
+    user_id = get_jwt_identity()
+
+    # Should never be true because of jwt.
+    if user_id is None:
+        response = {"message": "Unauthorized - user not logged in"}
+        return make_response(jsonify(response), 401)
+
+    user = UserService.get_user_by_id(user_id=user_id)
+
+    try:
+        first_name = request.json["first_name"]
+        last_name = request.json["last_name"]
+        gpa = request.json["gpa"]
+        academic_year = request.json["academic_year"]
+        github_link = request.json["github_link"]
+        linkedin_link = request.json["linkedin_link"]
+        website_link = request.json["website_link"]
+        profile_picture_link = request.json["profile_picture_link"]
+        email = request.json["email"]
+        phone_number = request.json["phone_number"]
+        description = request.json["description"]
+        internship_time_period_id = request.json[
+            "internship_time_period_id"
+        ]  # need to deal with this somewhere
+    except KeyError:
+        response = {"message": "Invalid request body"}
+        return make_response(jsonify(response), 400)
+
+    role_id = user.role_id
+
+    UserService.update_user(
+        user=user,
+        first_name=first_name,
+        last_name=last_name,
+        gpa=gpa,
+        academic_year=academic_year,
+        github_link=github_link,
+        linkedin_link=linkedin_link,
+        website_link=website_link,
+        profile_picture_link=profile_picture_link,
+        email=email,
+        phone_number=phone_number,
+        description=description,
+        role_id=role_id,
+        internship_time_period_id=internship_time_period_id,
+    )
+    response = {"message": "User profile updated successfully"}
+    return make_response(jsonify(response), 200)
