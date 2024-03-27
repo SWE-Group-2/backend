@@ -165,10 +165,10 @@ def test_update_internship(test_client: FlaskClient, session: db.session) -> Non
     assert internship.time_period_id == 1
 
 
-def test_update_other_user_internship(
-    test_client: FlaskClient, session: db.session
+def test_admin_update_internship(
+    test_client: FlaskClient, session: db.session, admin_access_token: str
 ) -> None:
-    """Test the update internship endpoint with an unauthorized user."""
+    """Test the update internship endpoint with an admin user."""
     new_internship = Internships(
         company="User 2's company",
         position="facility manager",
@@ -191,10 +191,34 @@ def test_update_other_user_internship(
         "time_period_id": 1,
         "company_photo_link": "www.baller.com/photo.jpg",
     }
+
     response = test_client.put(
         f"/internships/{new_internship.id}",
         json=data,
-        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json == {"message": "Internship updated successfully"}
+
+
+def test_non_admin_update_other_user_internship(
+    test_client: FlaskClient, session: db.session, student_access_token: str
+) -> None:
+    """Test the update internship endpoint with an unauthorized user."""
+    data = {
+        "company": "USER 2'S BALLER COMPANY",
+        "position": "Baller",
+        "website": "www.baller.com",
+        "deadline": "2025-01-01",
+        "time_period_id": 1,
+        "company_photo_link": "www.baller.com/photo.jpg",
+    }
+
+    response = test_client.put(
+        "/internships/1",
+        json=data,
+        headers={"Authorization": f"Bearer {student_access_token}"},
     )
     assert response.status_code == 401
     assert response.json == {"message": "Unauthorized"}
