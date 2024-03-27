@@ -16,10 +16,6 @@ def get_token(test_client: FlaskClient) -> str:
     return response.json["access_token"]
 
 
-def get_admin_login() -> dict:
-    return {"username": "admin", "password": "hardpass"}
-
-
 def register_user(test_client: FlaskClient, data: dict) -> TestResponse:
     """Register a user."""
     response = test_client.post(EndpointEnum.register.value, json=data)
@@ -156,7 +152,9 @@ def test_get_all_users(test_client: FlaskClient) -> None:
     assert len(response.json) >= 1
 
 
-def test_update_user(test_client: FlaskClient, session: db.session) -> None:
+def test_update_user(
+    test_client: FlaskClient, session: db.session, student_access_token: str
+) -> None:
     """Test the update user endpoint."""
     # Update all fields
     data = {
@@ -177,9 +175,7 @@ def test_update_user(test_client: FlaskClient, session: db.session) -> None:
     response = test_client.put(
         EndpointEnum.edit_profile.value,
         json=data,
-        headers={
-            "Authorization": f"Bearer {get_token(test_client, get_admin_login())}"
-        },
+        headers={"Authorization": f"Bearer {student_access_token}"},
     )
 
     assert response.status_code == 200
@@ -201,51 +197,17 @@ def test_update_user(test_client: FlaskClient, session: db.session) -> None:
     )
     assert user.internship_time_period_id == 1
 
-    # Another user
-    register_user(
-        test_client,
-        {
-            "first_name": "Second",
-            "last_name": "User",
-            "username": "MeToo",
-            "password": "twice",
-        },
-    )
 
-    user2_login = {"username": "MeToo", "password": "twice"}
-
-    response = test_client.put(
-        EndpointEnum.edit_profile.value,
-        json=data,
-        headers={"Authorization": f"Bearer {get_token(test_client, user2_login)}"},
-    )
-
-    data = {
-        "first_name": "Second",
-        "last_name": "Name",
-        "gpa": 4.0,
-        "academic_year": "Freshman",
-        "github_link": "www.github.com/MeToo",
-        "linkedin_link": "www.linkedin.com/MeToo",
-        "website_link": "www.MeToo.com",
-        "profile_picture_link": "www.imgur.com",
-        "email": "MeToo@student.mahidol.edu",
-        "phone_number": "100-000-000",
-        "description": "Too B or not too B?",
-        "internship_time_period_id": 1,
-    }
-
-
-def test_update_user_invalid_request(test_client: FlaskClient) -> None:
+def test_update_user_invalid_request(
+    test_client: FlaskClient, student_access_token: str
+) -> None:
     data = {
         "first_name": "Changed",
     }
     response = test_client.put(
         EndpointEnum.edit_profile.value,
         json=data,
-        headers={
-            "Authorization": f"Bearer {get_token(test_client, get_admin_login())}"
-        },
+        headers={"Authorization": f"Bearer {student_access_token}"},
     )
 
     assert response.status_code == 400
