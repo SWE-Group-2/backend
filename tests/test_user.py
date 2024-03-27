@@ -1,4 +1,6 @@
 from flask.testing import FlaskClient
+from flask_jwt_extended import get_jwt_identity
+from werkzeug.test import TestResponse
 
 from src.app import db
 from src.app.models.roles import RoleEnum
@@ -6,12 +8,16 @@ from src.app.models.users import Users
 from tests.conftest import EndpointEnum
 
 
-def get_token(test_client: FlaskClient) -> str:
-    """Get the token for the admin user."""
-    response = test_client.post(
-        EndpointEnum.login.value, json={"username": "admin", "password": "hardpass"}
-    )
-    return response.json["access_token"]
+def register_user(test_client: FlaskClient, data: dict) -> TestResponse:
+    """Register a user."""
+    response = test_client.post(EndpointEnum.register.value, json=data)
+    return response
+
+
+def login_user(test_client: FlaskClient, data: dict) -> TestResponse:
+    """Login the user."""
+    response = test_client.post(EndpointEnum.login.value, json=data)
+    return response
 
 
 def test_login(test_client: FlaskClient, session: db.session) -> None:
@@ -103,11 +109,13 @@ def test_register_existing_user(test_client: FlaskClient, session: db.session) -
     assert response.json == {"message": "Username already exists"}
 
 
-def test_get_user_by_id(test_client: FlaskClient, session: db.session) -> None:
+def test_get_user_by_id(
+    test_client: FlaskClient, session: db.session, admin_access_token: str
+) -> None:
     """Test the get user by id endpoint."""
     response = test_client.get(
         EndpointEnum.get_user.value.format(user_id=1),
-        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
     )
     assert response.status_code == 200
     assert response.json["id"] == 1
@@ -115,11 +123,13 @@ def test_get_user_by_id(test_client: FlaskClient, session: db.session) -> None:
     assert response.json["role_id"] == RoleEnum.admin.value
 
 
-def test_get_user_by_id_user_not_found(test_client: FlaskClient) -> None:
+def test_get_user_by_id_user_not_found(
+    test_client: FlaskClient, admin_access_token: str
+) -> None:
     """Test the get user by id endpoint with a user not found."""
     response = test_client.get(
         EndpointEnum.get_user.value.format(user_id=69420),
-        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
     )
     assert response.status_code == 404
     assert response.json == {"message": "User not found"}
@@ -136,3 +146,65 @@ def test_get_all_users(test_client: FlaskClient) -> None:
     assert admin["username"] == "admin"
     assert admin["role_id"] == RoleEnum.admin.value
     assert len(response.json) >= 1
+
+
+def test_update_user(
+    test_client: FlaskClient, session: db.session, student_access_token: str
+) -> None:
+    """Test the update user endpoint."""
+    # Update all fields
+    data = {
+        "first_name": "Changed",
+        "last_name": "Name",
+        "gpa": 3.2,
+        "academic_year": "Junior",
+        "github_link": "www.github.com/profile",
+        "linkedin_link": "www.linkedin.com/profile",
+        "website_link": "www.uwu.com",
+        "profile_picture_link": "www.owo.com",
+        "email": "changed@muic.edu",
+        "phone_number": "011-456-7881",
+        "description": "Knock, knock. Who's there? Just me. Just me who? Just me, I'm updated.",
+        "internship_time_period_id": 1,
+    }
+
+    response = test_client.put(
+        EndpointEnum.edit_profile.value,
+        json=data,
+        headers={"Authorization": f"Bearer {student_access_token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json == {"message": "User profile updated successfully"}
+    user = session.query(Users).filter(Users.id == get_jwt_identity()).first()
+    assert user.first_name == "Changed"
+    assert user.last_name == "Name"
+    assert user.gpa == 3.2
+    assert user.academic_year == "Junior"
+    assert user.github_link == "www.github.com/profile"
+    assert user.linkedin_link == "www.linkedin.com/profile"
+    assert user.website_link == "www.uwu.com"
+    assert user.profile_picture_link == "www.owo.com"
+    assert user.email == "changed@muic.edu"
+    assert user.phone_number == "011-456-7881"
+    assert (
+        user.description
+        == "Knock, knock. Who's there? Just me. Just me who? Just me, I'm updated."
+    )
+    assert user.internship_time_period_id == 1
+
+
+def test_update_user_invalid_request(
+    test_client: FlaskClient, student_access_token: str
+) -> None:
+    data = {
+        "first_name": "Changed",
+    }
+    response = test_client.put(
+        EndpointEnum.edit_profile.value,
+        json=data,
+        headers={"Authorization": f"Bearer {student_access_token}"},
+    )
+
+    assert response.status_code == 400
+    assert response.json == {"message": "Invalid request body"}
