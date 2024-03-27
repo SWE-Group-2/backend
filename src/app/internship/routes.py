@@ -136,11 +136,12 @@ def update_internship(internship_id: int) -> Response:
 def delete_internship(internship_id: int) -> Response:
     """Delete an internship."""
     internship = InternshipService.get_internship(internship_id)
+    user = UserService.get_user_by_id(get_jwt_identity())
 
     if internship is None:
         response = {"message": "Internship not found"}
         return make_response(jsonify(response), 404)
-    elif internship.author_id != get_jwt_identity():
+    elif internship.author_id != user.id and user.role_id != 1:
         response = {"message": "Unauthorized"}
         return make_response(jsonify(response), 401)
 
