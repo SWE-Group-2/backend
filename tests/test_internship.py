@@ -258,10 +258,10 @@ def test_delete_internship_dne(test_client: FlaskClient, session: db.session) ->
     assert response.json == {"message": "Internship not found"}
 
 
-def test_delete_other_user_internship(
-    test_client: FlaskClient, session: db.session
+def test_admin_delete_internship(
+    test_client: FlaskClient, session: db.session, admin_access_token: str
 ) -> None:
-    """Test the delete internship endpoint."""
+    """Test the delete internship endpoint with admin."""
     new_internship = Internships(
         company="User 2's company",
         position="facility manager",
@@ -278,7 +278,19 @@ def test_delete_other_user_internship(
 
     response = test_client.delete(
         f"/internships/{new_internship.id}",
-        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
+    )
+    assert response.status_code == 200
+    assert response.json == {"message": "Internship deleted successfully"}
+
+
+def test_non_admin_delete_other_user_internship(
+    test_client: FlaskClient, session: db.session, student_access_token: str
+) -> None:
+    """Test the delete internship endpoint with an unauthorized user."""
+    response = test_client.delete(
+        "/internships/1",
+        headers={"Authorization": f"Bearer {student_access_token}"},
     )
     assert response.status_code == 401
     assert response.json == {"message": "Unauthorized"}
