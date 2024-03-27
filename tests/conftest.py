@@ -5,6 +5,7 @@ import typing
 import pytest
 from flask import Flask
 from flask.testing import FlaskClient
+from flask_jwt_extended import create_access_token
 
 from src.app import create_app
 from src.app.extensions import db
@@ -27,7 +28,11 @@ class EndpointEnum(enum.Enum):
 
     login = "/users/login"
     get_current_user = "/users/get_current_user"
+    get_all_users = "/users"
+    get_user = "/users/{user_id}"
     register = "/users/register"
+    update_internship = "/internships/{internship_id}"
+    add_time_period = "/admin/add_time_period"
 
 
 @pytest.fixture(scope="session")
@@ -73,3 +78,13 @@ def session(test_db: db, request: pytest.FixtureRequest) -> db.session:
 
     request.addfinalizer(teardown)
     return db.session
+
+
+@pytest.fixture(scope="function")
+def admin_access_token() -> str:
+    return create_access_token(identity=1)
+
+
+@pytest.fixture(scope="function")
+def student_access_token() -> str:
+    return create_access_token(identity=2)

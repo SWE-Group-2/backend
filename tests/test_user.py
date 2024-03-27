@@ -6,6 +6,14 @@ from src.app.models.users import Users
 from tests.conftest import EndpointEnum
 
 
+def get_token(test_client: FlaskClient) -> str:
+    """Get the token for the admin user."""
+    response = test_client.post(
+        EndpointEnum.login.value, json={"username": "admin", "password": "hardpass"}
+    )
+    return response.json["access_token"]
+
+
 def test_login(test_client: FlaskClient, session: db.session) -> None:
     """Test the login endpoint."""
     data = {"username": "admin", "password": "hardpass"}
@@ -93,3 +101,38 @@ def test_register_existing_user(test_client: FlaskClient, session: db.session) -
     response = test_client.post(EndpointEnum.register.value, json=data)
     assert response.status_code == 409
     assert response.json == {"message": "Username already exists"}
+
+
+def test_get_user_by_id(test_client: FlaskClient, session: db.session) -> None:
+    """Test the get user by id endpoint."""
+    response = test_client.get(
+        EndpointEnum.get_user.value.format(user_id=1),
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 200
+    assert response.json["id"] == 1
+    assert response.json["username"] == "admin"
+    assert response.json["role_id"] == RoleEnum.admin.value
+
+
+def test_get_user_by_id_user_not_found(test_client: FlaskClient) -> None:
+    """Test the get user by id endpoint with a user not found."""
+    response = test_client.get(
+        EndpointEnum.get_user.value.format(user_id=69420),
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 404
+    assert response.json == {"message": "User not found"}
+
+
+def test_get_all_users(test_client: FlaskClient) -> None:
+    """Test the get all users endpoint."""
+    response = test_client.get(
+        EndpointEnum.get_all_users.value,
+    )
+    assert response.status_code == 200
+    admin = response.json[0]
+    assert admin["id"] == 1
+    assert admin["username"] == "admin"
+    assert admin["role_id"] == RoleEnum.admin.value
+    assert len(response.json) >= 1

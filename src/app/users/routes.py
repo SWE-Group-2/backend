@@ -72,3 +72,89 @@ def register() -> Response:
 
     response = {"message": "User created successfully"}
     return make_response(jsonify(response), 201)
+
+
+@bp.route("/users", methods=["GET"])
+def get_all_users() -> Response:
+    """Return all users."""
+    users = UserService.get_all_users()
+    users_json = [
+        {
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "username": user.username,
+            "gpa": user.gpa,
+            "academic_year": user.academic_year,
+            "github_link": user.github_link,
+            "linkedin_link": user.linkedin_link,
+            "website_link": user.website_link,
+            "profile_picture_link": user.profile_picture_link,
+            "email": user.email,
+            "phone_number": user.phone_number,
+            "description": user.description,
+            "role_id": user.role_id,
+            "internship_time_period_id": user.internship_time_period_id,
+        }
+        for user in users
+    ]
+
+    return jsonify(users_json)
+
+
+@bp.route("/users/students", methods=["GET"])
+def get_all_students() -> Response:
+    """Return all students."""
+    students = UserService.get_all_students()
+    students_json = [
+        {
+            "id": student.id,
+            "first_name": student.first_name,
+            "last_name": student.last_name,
+            "username": student.username,
+            "gpa": student.gpa,
+            "academic_year": student.academic_year,
+            "github_link": student.github_link,
+            "linkedin_link": student.linkedin_link,
+            "website_link": student.website_link,
+            "profile_picture_link": student.profile_picture_link,
+            "email": student.email,
+            "phone_number": student.phone_number,
+            "description": student.description,
+            "role_id": student.role_id,
+            "internship_time_period_id": student.internship_time_period_id,
+        }
+        for student in students
+    ]
+
+    return jsonify(students_json)
+
+
+@bp.route("/users/<int:user_id>", methods=["GET"])
+@jwt_required()
+def get_user(user_id: int) -> Response:
+    """Return a user by id."""
+    user = UserService.get_user_by_id(user_id)
+    if user is None:
+        response = {"message": "User not found"}
+        return make_response(jsonify(response), 404)
+
+    user_json = {
+        "id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "username": user.username,
+        "gpa": user.gpa,
+        "academic_year": user.academic_year,
+        "github_link": user.github_link,
+        "linkedin_link": user.linkedin_link,
+        "website_link": user.website_link,
+        "profile_picture_link": user.profile_picture_link,
+        "email": user.email,
+        "phone_number": user.phone_number,
+        "description": user.description,
+        "role_id": user.role_id,
+        "internship_time_period_id": user.internship_time_period_id,
+    }
+
+    return jsonify(user_json)
