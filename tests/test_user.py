@@ -8,14 +8,6 @@ from src.app.models.users import Users
 from tests.conftest import EndpointEnum
 
 
-def get_token(test_client: FlaskClient) -> str:
-    """Get the token for the admin user."""
-    response = test_client.post(
-        EndpointEnum.login.value, json={"username": "admin", "password": "hardpass"}
-    )
-    return response.json["access_token"]
-
-
 def register_user(test_client: FlaskClient, data: dict) -> TestResponse:
     """Register a user."""
     response = test_client.post(EndpointEnum.register.value, json=data)
@@ -117,11 +109,13 @@ def test_register_existing_user(test_client: FlaskClient, session: db.session) -
     assert response.json == {"message": "Username already exists"}
 
 
-def test_get_user_by_id(test_client: FlaskClient, session: db.session) -> None:
+def test_get_user_by_id(
+    test_client: FlaskClient, session: db.session, admin_access_token: str
+) -> None:
     """Test the get user by id endpoint."""
     response = test_client.get(
         EndpointEnum.get_user.value.format(user_id=1),
-        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
     )
     assert response.status_code == 200
     assert response.json["id"] == 1
@@ -129,11 +123,13 @@ def test_get_user_by_id(test_client: FlaskClient, session: db.session) -> None:
     assert response.json["role_id"] == RoleEnum.admin.value
 
 
-def test_get_user_by_id_user_not_found(test_client: FlaskClient) -> None:
+def test_get_user_by_id_user_not_found(
+    test_client: FlaskClient, admin_access_token: str
+) -> None:
     """Test the get user by id endpoint with a user not found."""
     response = test_client.get(
         EndpointEnum.get_user.value.format(user_id=69420),
-        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+        headers={"Authorization": f"Bearer {admin_access_token}"},
     )
     assert response.status_code == 404
     assert response.json == {"message": "User not found"}
