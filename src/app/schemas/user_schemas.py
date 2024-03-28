@@ -2,7 +2,7 @@
 from marshmallow import Schema, fields, validate
 
 
-class UserRegisterSchema(Schema):
+class UserRegister(Schema):
     """Schema for user registration."""
 
     username = fields.Str(required=True, validate=validate.Length(min=1, max=255))
@@ -11,14 +11,14 @@ class UserRegisterSchema(Schema):
     password = fields.Str(required=True, validate=validate.Length(min=8, max=255))
 
 
-class UserLoginSchema(Schema):
+class UserLogin(Schema):
     """Schema for user login."""
 
     username = fields.Str(required=True, validate=validate.Length(min=1, max=255))
     password = fields.Str(required=True, validate=validate.Length(min=8, max=255))
 
 
-class UserEditSchema(Schema):
+class UserEdit(Schema):
     """Schema for editing user data."""
 
     first_name = fields.Str(validate=validate.Length(min=1, max=255))

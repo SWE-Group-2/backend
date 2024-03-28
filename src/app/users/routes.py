@@ -1,9 +1,13 @@
 """Module for users related endpoints."""
-from flask import Response, jsonify, make_response, request
+from http import HTTPStatus
+
+from flask import Response, jsonify, make_response
 from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
 
-from src.app.models.roles import RoleEnum
+import src.app.constants.error_messages as errors
 from src.app.models.users import Users
+from src.app.schemas.user_schemas import UserEdit, UserLogin, UserRegister, UserSchema
+from src.app.schemas.wrappers import handle_validation
 from src.app.services.user_service import UserService
 from src.app.users import bp
 from src.app.utils.password_hasher import PasswordHasher
@@ -18,110 +22,62 @@ def get_current_user() -> Response:
 
 
 @bp.route("/users/login", methods=["POST"])
-def login() -> Response:
+@handle_validation(schema=UserLogin())
+def login(user_data: dict) -> Response:
     """Generate a JWT token for the user."""
-    try:
-        username = request.json["username"]
-        password = request.json["password"]
-    except KeyError:
-        response = {"message": "Invalid request"}
-        return make_response(jsonify(response), 400)
+    username = user_data["username"]
+    password = user_data["password"]
 
     user = Users.query.filter_by(username=username).first()
+    is_password_valid = (
+        PasswordHasher.verify_password(password, user.password) if user else False
+    )
 
     if user is None:
-        response = {"message": "User not found"}
-        return make_response(jsonify(response), 404)
-    elif PasswordHasher.verify_password(password, user.password) is False:
-        response = {"message": "Invalid password"}
-        return make_response(jsonify(response), 401)
+        response = {"message": errors.USER_NOT_FOUND}
+        return make_response(jsonify(response), HTTPStatus.NOT_FOUND)
+    elif not is_password_valid:
+        response = {"message": errors.INVALID_PASSWORD}
+        return make_response(jsonify(response), HTTPStatus.UNAUTHORIZED)
 
     access_token = create_access_token(identity=user.id)
     return jsonify(access_token=access_token)
 
 
 @bp.route("/users/register", methods=["POST"])
-def register() -> Response:
+@handle_validation(schema=UserRegister())
+def register(user_data: dict) -> Response:
     """Register a new user."""
-    try:
-        first_name = request.json["first_name"]
-        last_name = request.json["last_name"]
-        username = request.json["username"]
-        password = request.json["password"]
-    except KeyError:
-        response = {"message": "Invalid request body"}
-        return make_response(jsonify(response), 400)
-
-    if UserService.get_user_by_username(username=username):
-        response = {"message": "Username already exists"}
-        return make_response(jsonify(response), 409)
-
-    UserService.create_user(
-        first_name=first_name,
-        last_name=last_name,
-        username=username,
-        password=PasswordHasher.hash_password(password=password),
-        role_id=RoleEnum.student.value,
+    username_exists = (
+        UserService.get_user_by_username(username=user_data["username"]) is not None
     )
 
+    if username_exists:
+        response = {"message": errors.USERNAME_EXISTS}
+        return make_response(jsonify(response), HTTPStatus.CONFLICT)
+
+    UserService.create_user(user_data=user_data)
+
     response = {"message": "User created successfully"}
-    return make_response(jsonify(response), 201)
+    return make_response(jsonify(response), HTTPStatus.CREATED)
 
 
 @bp.route("/users", methods=["GET"])
 def get_all_users() -> Response:
     """Return all users."""
     users = UserService.get_all_users()
-    users_json = [
-        {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "username": user.username,
-            "gpa": user.gpa,
-            "academic_year": user.academic_year,
-            "github_link": user.github_link,
-            "linkedin_link": user.linkedin_link,
-            "website_link": user.website_link,
-            "profile_picture_link": user.profile_picture_link,
-            "email": user.email,
-            "phone_number": user.phone_number,
-            "description": user.description,
-            "role_id": user.role_id,
-            "internship_time_period_id": user.internship_time_period_id,
-        }
-        for user in users
-    ]
-
-    return jsonify(users_json)
+    user_schema = UserSchema(many=True)
+    users_json = user_schema.dump(users)
+    return make_response(jsonify(users_json), HTTPStatus.OK)
 
 
 @bp.route("/users/students", methods=["GET"])
 def get_all_students() -> Response:
     """Return all students."""
     students = UserService.get_all_students()
-    students_json = [
-        {
-            "id": student.id,
-            "first_name": student.first_name,
-            "last_name": student.last_name,
-            "username": student.username,
-            "gpa": student.gpa,
-            "academic_year": student.academic_year,
-            "github_link": student.github_link,
-            "linkedin_link": student.linkedin_link,
-            "website_link": student.website_link,
-            "profile_picture_link": student.profile_picture_link,
-            "email": student.email,
-            "phone_number": student.phone_number,
-            "description": student.description,
-            "role_id": student.role_id,
-            "internship_time_period_id": student.internship_time_period_id,
-        }
-        for student in students
-    ]
-
-    return jsonify(students_json)
+    user_schema = UserSchema(many=True)
+    users_json = user_schema.dump(students)
+    return make_response(jsonify(users_json), HTTPStatus.OK)
 
 
 @bp.route("/users/<int:user_id>", methods=["GET"])
@@ -131,78 +87,29 @@ def get_user(user_id: int) -> Response:
     user = UserService.get_user_by_id(user_id)
     if user is None:
         response = {"message": "User not found"}
-        return make_response(jsonify(response), 404)
+        return make_response(jsonify(response), HTTPStatus.NOT_FOUND)
 
-    user_json = {
-        "id": user.id,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "username": user.username,
-        "gpa": user.gpa,
-        "academic_year": user.academic_year,
-        "github_link": user.github_link,
-        "linkedin_link": user.linkedin_link,
-        "website_link": user.website_link,
-        "profile_picture_link": user.profile_picture_link,
-        "email": user.email,
-        "phone_number": user.phone_number,
-        "description": user.description,
-        "role_id": user.role_id,
-        "internship_time_period_id": user.internship_time_period_id,
-    }
-
-    return jsonify(user_json)
+    user_schema = UserSchema()
+    user_json = user_schema.dump(user)
+    return make_response(jsonify(user_json), HTTPStatus.OK)
 
 
 @bp.route("/users/edit_profile", methods=["PUT"])
 @jwt_required()
-def edit_user_profile() -> Response:
+@handle_validation(schema=UserEdit())
+def edit_user_profile(edited_user_data: dict) -> Response:
     """Edit the user profile."""
     user_id = get_jwt_identity()
 
-    # Should never be true because of jwt.
     if user_id is None:
         response = {"message": "Unauthorized - user not logged in"}
-        return make_response(jsonify(response), 401)
+        return make_response(jsonify(response), HTTPStatus.UNAUTHORIZED)
 
     user = UserService.get_user_by_id(user_id=user_id)
 
-    try:
-        first_name = request.json["first_name"]
-        last_name = request.json["last_name"]
-        gpa = request.json["gpa"]
-        academic_year = request.json["academic_year"]
-        github_link = request.json["github_link"]
-        linkedin_link = request.json["linkedin_link"]
-        website_link = request.json["website_link"]
-        profile_picture_link = request.json["profile_picture_link"]
-        email = request.json["email"]
-        phone_number = request.json["phone_number"]
-        description = request.json["description"]
-        internship_time_period_id = request.json[
-            "internship_time_period_id"
-        ]  # need to deal with this somewhere
-    except KeyError:
-        response = {"message": "Invalid request body"}
-        return make_response(jsonify(response), 400)
-
-    role_id = user.role_id
-
     UserService.update_user(
         user=user,
-        first_name=first_name,
-        last_name=last_name,
-        gpa=gpa,
-        academic_year=academic_year,
-        github_link=github_link,
-        linkedin_link=linkedin_link,
-        website_link=website_link,
-        profile_picture_link=profile_picture_link,
-        email=email,
-        phone_number=phone_number,
-        description=description,
-        role_id=role_id,
-        internship_time_period_id=internship_time_period_id,
+        edited_user_data=edited_user_data,
     )
     response = {"message": "User profile updated successfully"}
-    return make_response(jsonify(response), 200)
+    return make_response(jsonify(response), HTTPStatus.OK)
