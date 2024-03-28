@@ -1,37 +1,29 @@
+from http import HTTPStatus
+
 from flask.testing import FlaskClient
 from flask_jwt_extended import get_jwt_identity
-from werkzeug.test import TestResponse
 
+import src.app.constants.error_messages as errors
+import src.app.constants.success_messages as success
 from src.app import db
 from src.app.models.roles import RoleEnum
 from src.app.models.users import Users
 from tests.conftest import EndpointEnum
 
 
-def register_user(test_client: FlaskClient, data: dict) -> TestResponse:
-    """Register a user."""
-    response = test_client.post(EndpointEnum.register.value, json=data)
-    return response
-
-
-def login_user(test_client: FlaskClient, data: dict) -> TestResponse:
-    """Login the user."""
-    response = test_client.post(EndpointEnum.login.value, json=data)
-    return response
-
-
 def test_login(test_client: FlaskClient, session: db.session) -> None:
     """Test the login endpoint."""
     data = {"username": "admin", "password": "hardpass"}
     response = test_client.post(EndpointEnum.login.value, json=data)
-    assert response.status_code == 200
+
+    assert response.status_code == HTTPStatus.OK
     assert "access_token" in response.json
+
     access_token = response.json["access_token"]
     response = test_client.get(
         EndpointEnum.get_current_user.value,
         headers={"Authorization": f"Bearer {access_token}"},
     )
-    assert response.status_code == 200
     assert response.json == {"logged_in_as": 1}
 
 
@@ -41,19 +33,19 @@ def test_login_invalid_request(test_client: FlaskClient) -> None:
         "obama": "prism",
     }
     response = test_client.post(EndpointEnum.login.value, json=data)
-    assert response.status_code == 400
-    assert response.json == {"message": "Invalid request"}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json["message"] == errors.INVALID_REQUEST_BODY
 
 
 def test_login_user_not_found(test_client: FlaskClient) -> None:
     """Test the login endpoint with a user not found."""
     data = {
         "username": "obama",
-        "password": "prism",
+        "password": "obamaprism",
     }
     response = test_client.post(EndpointEnum.login.value, json=data)
-    assert response.status_code == 404
-    assert response.json == {"message": "User not found"}
+    assert response.status_code == HTTPStatus.NOT_FOUND
+    assert response.json == {"message": errors.USER_NOT_FOUND}
 
 
 def test_login_invalid_password(test_client: FlaskClient) -> None:
@@ -63,8 +55,8 @@ def test_login_invalid_password(test_client: FlaskClient) -> None:
         "password": "wrongpass",
     }
     response = test_client.post(EndpointEnum.login.value, json=data)
-    assert response.status_code == 401
-    assert response.json == {"message": "Invalid password"}
+    assert response.status_code == HTTPStatus.UNAUTHORIZED
+    assert response.json == {"message": errors.INVALID_PASSWORD}
 
 
 def test_register(test_client: FlaskClient, session: db.session) -> None:
@@ -76,8 +68,8 @@ def test_register(test_client: FlaskClient, session: db.session) -> None:
         "password": "hardpass",
     }
     response = test_client.post(EndpointEnum.register.value, json=data)
-    assert response.status_code == 201
-    assert response.json == {"message": "User created successfully"}
+    assert response.status_code == HTTPStatus.CREATED
+    assert response.json == {"message": success.USER_CREATED}
     user = session.query(Users).filter(Users.username == "test_user").first()
     assert user.first_name == "Test"
     assert user.last_name == "User"
@@ -92,8 +84,8 @@ def test_register_invalid_request(test_client: FlaskClient) -> None:
         "first_name": "BOB",
     }
     response = test_client.post(EndpointEnum.register.value, json=data)
-    assert response.status_code == 400
-    assert response.json == {"message": "Invalid request body"}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json["message"] == errors.INVALID_REQUEST_BODY
 
 
 def test_register_existing_user(test_client: FlaskClient, session: db.session) -> None:
@@ -105,8 +97,8 @@ def test_register_existing_user(test_client: FlaskClient, session: db.session) -
         "password": "hardpass",
     }
     response = test_client.post(EndpointEnum.register.value, json=data)
-    assert response.status_code == 409
-    assert response.json == {"message": "Username already exists"}
+    assert response.status_code == HTTPStatus.CONFLICT
+    assert response.json == {"message": errors.USERNAME_EXISTS}
 
 
 def test_get_user_by_id(
@@ -132,7 +124,7 @@ def test_get_user_by_id_user_not_found(
         headers={"Authorization": f"Bearer {admin_access_token}"},
     )
     assert response.status_code == 404
-    assert response.json == {"message": "User not found"}
+    assert response.json == {"message": errors.USER_NOT_FOUND}
 
 
 def test_get_all_users(test_client: FlaskClient) -> None:
@@ -175,7 +167,7 @@ def test_update_user(
     )
 
     assert response.status_code == 200
-    assert response.json == {"message": "User profile updated successfully"}
+    assert response.json == {"message": success.USER_UPDATED}
     user = session.query(Users).filter(Users.id == get_jwt_identity()).first()
     assert user.first_name == "Changed"
     assert user.last_name == "Name"
@@ -206,5 +198,5 @@ def test_update_user_invalid_request(
         headers={"Authorization": f"Bearer {student_access_token}"},
     )
 
-    assert response.status_code == 400
-    assert response.json == {"message": "Invalid request body"}
+    assert response.status_code == HTTPStatus.BAD_REQUEST
+    assert response.json["message"] == errors.INVALID_REQUEST_BODY
