@@ -9,12 +9,6 @@ from src.app.users import bp
 from src.app.utils.password_hasher import PasswordHasher
 
 
-@bp.route("/student")
-def index() -> str:
-    """Return example text for the users blueprint."""
-    return "This is the users blueprint."
-
-
 @bp.route("/users/get_current_user", methods=["GET"])
 @jwt_required()
 def get_current_user() -> Response:

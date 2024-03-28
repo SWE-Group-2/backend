@@ -12,12 +12,6 @@ from src.app.services.time_period_service import TimePeriodService
 from src.app.services.user_service import UserService
 
 
-@bp.route("/admin")
-def index() -> str:
-    """Return example text for the admin blueprint."""
-    return "This is the admin blueprint."
-
-
 @bp.route("/admin/delete_user/<int:user_id>", methods=["DELETE"])
 @jwt_required()
 def delete_user(user_id: int) -> Response:
