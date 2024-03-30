@@ -8,7 +8,7 @@ class UploadService:
     """Service for upload-related tasks."""
 
     @staticmethod
-    def upload_file_to_aws(file: BinaryIO, filename: str):
+    def upload_file_to_aws(file: BinaryIO, filename: str, container: str):
         """Create a function for the file upload endpoint."""
         s3 = boto3.resource(
             service_name="s3",
@@ -17,6 +17,4 @@ class UploadService:
             aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
         )
 
-        print("worked till here")
-
-        s3.Bucket(os.getenv("AWS_BUCKET_NAME")).put_object(Key=filename, Body=file)
+        s3.Bucket(os.getenv(container)).put_object(Key=filename, Body=file)
