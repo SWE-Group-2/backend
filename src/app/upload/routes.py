@@ -100,9 +100,67 @@ def upload_cv() -> Response:
         UploadService.upload_file_to_aws(
             BytesIO(file_content), filename, "AWS_BUCKET_NAME_CVS"
         )
-        return jsonify(
-            {"message": "File uploaded successfully"}
-        )  # Return success response
+        return jsonify({"message": "File uploaded successfully"})
     except (BotoCoreError, ClientError) as e:
         response = {"message": "Error uploading file: {}".format(str(e))}
+        return make_response(jsonify(response), 500)
+
+
+@bp.route("/delete_profilepic", methods=["OPTIONS", "DELETE"])
+def delete_profilepic() -> Response:
+    """Delete profile pic from cloud container."""
+    if request.method == "OPTIONS":
+        response = jsonify()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+
+    filename = "profilepic_" + request.form["user_id"]
+
+    try:
+        UploadService.delete_file_from_aws(filename, "AWS_BUCKET_NAME_PROFILEPICS")
+        return jsonify({"message": "File deleted successfully"})
+    except (BotoCoreError, ClientError) as e:
+        response = {"message": "Error deleting file: {}".format(str(e))}
+        return make_response(jsonify(response), 500)
+
+
+@bp.route("/delete_companypic", methods=["OPTIONS", "DELETE"])
+def delete_companypic() -> Response:
+    """Delete company pic from cloud container."""
+    if request.method == "OPTIONS":
+        response = jsonify()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+
+    filename = "companypic_" + request.form["internship_id"]
+
+    try:
+        UploadService.delete_file_from_aws(filename, "AWS_BUCKET_NAME_COMPANYPICS")
+        return jsonify({"message": "File deleted successfully"})
+    except (BotoCoreError, ClientError) as e:
+        response = {"message": "Error deleting file: {}".format(str(e))}
+        return make_response(jsonify(response), 500)
+
+
+@bp.route("/delete_cv", methods=["OPTIONS", "DELETE"])
+def delete_cv() -> Response:
+    """Delete cv from cloud container."""
+    if request.method == "OPTIONS":
+        response = jsonify()
+        response.headers.add("Access-Control-Allow-Origin", "*")
+        response.headers.add("Access-Control-Allow-Headers", "*")
+        response.headers.add("Access-Control-Allow-Methods", "*")
+        return response
+
+    filename = "cv_" + request.form["user_id"]
+
+    try:
+        UploadService.delete_file_from_aws(filename, "AWS_BUCKET_NAME_CVS")
+        return jsonify({"message": "File deleted successfully"})
+    except (BotoCoreError, ClientError) as e:
+        response = {"message": "Error deleting file: {}".format(str(e))}
         return make_response(jsonify(response), 500)
