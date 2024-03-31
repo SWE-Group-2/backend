@@ -73,3 +73,19 @@ class InternshipService:
         internship = Internships.query.filter(Internships.id == internship_id).first()
         db.session.delete(internship)
         db.session.commit()
+
+    @staticmethod
+    def flag_internship(internship_id: int) -> Internships:
+        """Flag an internship."""
+        internship = Internships.query.filter(Internships.id == internship_id).first()
+        internship.flagged = True
+        db.session.commit()
+        return internship
+
+    @staticmethod
+    def unflag_internship(internship_id: int) -> Internships:
+        """Unflag an internship."""
+        internship = Internships.query.filter(Internships.id == internship_id).first()
+        internship.flagged = False
+        db.session.commit()
+        return internship
