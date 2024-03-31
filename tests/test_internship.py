@@ -3,6 +3,7 @@ from datetime import datetime
 from flask.testing import FlaskClient
 
 from src.app import db
+from src.app.models.flags import Flags
 from src.app.models.internships import Internships
 from tests.conftest import EndpointEnum
 
@@ -306,6 +307,9 @@ def test_flag_internship(test_client: FlaskClient, session: db.session) -> None:
     assert response.json == {"message": "Internship flagged successfully"}
     internship = session.query(Internships).filter(Internships.id == 1).first()
     assert internship.flagged is True
+    flag = session.query(Flags).filter(Flags.internship_id == 1).first()
+    assert flag.internship_id == 1
+    assert flag.user_id == 1
 
 
 def test_flag_internship_dne(test_client: FlaskClient) -> None:
@@ -332,6 +336,14 @@ def test_flag_internship_unauthorized_user(
 
 def test_unflag_internship(test_client: FlaskClient, session: db.session) -> None:
     """Test the unflag internship endpoint."""
+    flag = Flags(internship_id=1, user_id=1)
+    session.add(flag)
+    session.commit()
+
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+    internship.flagged = True
+    session.commit()
+
     response = test_client.put(
         EndpointEnum.unflag_internship.value.format(internship_id=1),
         headers={"Authorization": f"Bearer {get_token(test_client)}"},
@@ -340,6 +352,9 @@ def test_unflag_internship(test_client: FlaskClient, session: db.session) -> Non
     assert response.json == {"message": "Internship unflagged successfully"}
     internship = session.query(Internships).filter(Internships.id == 1).first()
     assert internship.flagged is False
+
+    flag = session.query(Flags).filter(Flags.internship_id == 1).first()
+    assert flag is None
 
 
 def test_unflag_internship_dne(test_client: FlaskClient) -> None:
