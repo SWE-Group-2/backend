@@ -23,6 +23,36 @@ def get_current_user() -> Response:
     return jsonify(logged_in_as=current_user)
 
 
+@bp.route("/users/google/login", methods=["POST"])
+def google_login() -> Response:
+    """Generate a JWT token for the user."""
+    try:
+        print(request.json)
+        first_name = request.json["first_name"]
+        last_name = request.json["last_name"]
+        username = request.json["username"]
+        password = request.json["password"]
+    except KeyError:
+        response = {"message": "Invalid request"}
+        return make_response(jsonify(response), 400)
+
+    user = Users.query.filter_by(username=username).first()
+
+    if user is None:
+        UserService.create_user(
+            first_name=first_name,
+            last_name=last_name,
+            username=username,
+            password=PasswordHasher.hash_password(password=password),
+            role_id=RoleEnum.student.value,
+        )
+
+    user = Users.query.filter_by(username=username).first()
+
+    access_token = create_access_token(identity=user.id)
+    return jsonify(access_token=access_token)
+
+
 @bp.route("/users/login", methods=["POST"])
 def login() -> Response:
     """Generate a JWT token for the user."""
