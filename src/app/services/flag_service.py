@@ -7,29 +7,29 @@ class FlagService:
     """Class for Flag related tasks."""
 
     @staticmethod
-    def user_has_flagged(internship_id: int, author_id: int) -> bool:
+    def user_has_flagged(internship_id: int, user_id: int) -> bool:
         """Check if a user has flagged an internship."""
         flag = Flags.query.filter(
-            Flags.internship_id == internship_id, Flags.author_id == author_id
+            Flags.internship_id == internship_id, Flags.user_id == user_id
         ).first()
         return flag is not None
 
     @staticmethod
-    def create_flag(internship_id: int, author_id: int) -> Flags:
+    def create_flag(internship_id: int, user_id: int) -> Flags:
         """Create a new flag."""
         flag = Flags(
             internship_id=internship_id,
-            author_id=author_id,
+            user_id=user_id,
         )
         db.session.add(flag)
         db.session.commit()
         return flag
 
     @staticmethod
-    def delete_flag(internship_id: int, author_id: int) -> None:
+    def delete_flag(internship_id: int, user_id: int) -> None:
         """Delete a flag."""
         flag = Flags.query.filter(
-            Flags.internship_id == internship_id, Flags.author_id == author_id
+            Flags.internship_id == internship_id, Flags.user_id == user_id
         ).first()
         db.session.delete(flag)
         db.session.commit()
