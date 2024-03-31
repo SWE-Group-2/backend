@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
+from app.services.flag_service import FlagService
 from src.app.internship import bp
 from src.app.models.roles import RoleEnum
 from src.app.services.internship_service import InternshipService
@@ -166,7 +167,9 @@ def flag_internship(internship_id: int) -> Response:
         response = {"message": "Unauthorized"}
         return make_response(jsonify(response), 401)
 
-    InternshipService.flag_internship(internship_id=internship_id)
+    if not FlagService.user_has_flagged(internship_id=internship_id, author_id=user.id):
+        FlagService.create_flag(internship_id=internship_id, author_id=user.id)
+        InternshipService.flag_internship(internship_id=internship_id)
 
     response = {"message": "Internship flagged successfully"}
     return make_response(jsonify(response), 200)
@@ -186,7 +189,11 @@ def unflag_internship(internship_id: int) -> Response:
         response = {"message": "Unauthorized"}
         return make_response(jsonify(response), 401)
 
-    InternshipService.unflag_internship(internship_id=internship_id)
+    if FlagService.user_has_flagged(internship_id=internship_id, author_id=user.id):
+        FlagService.delete_flag(internship_id=internship_id, author_id=user.id)
+
+    if FlagService.num_flags(internship_id) == 0:
+        InternshipService.unflag_internship(internship_id=internship_id)
 
     response = {"message": "Internship unflagged successfully"}
     return make_response(jsonify(response), 200)
