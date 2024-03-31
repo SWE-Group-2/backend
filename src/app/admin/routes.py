@@ -8,6 +8,8 @@ from sqlalchemy.orm.exc import UnmappedInstanceError
 from src.app.admin import bp
 from src.app.models.roles import RoleEnum
 from src.app.services.admin_service import AdminService
+from src.app.services.flag_service import FlagService
+from src.app.services.internship_service import InternshipService
 from src.app.services.time_period_service import TimePeriodService
 from src.app.services.user_service import UserService
 
@@ -102,4 +104,25 @@ def delete_time_period(time_period_id: int) -> Response:
         response = {"message": "Time period not found"}
         return make_response(jsonify(response), 404)
     response = {"message": "Time period deleted successfully"}
+    return make_response(jsonify(response), 200)
+
+
+@bp.route("/internships/clear_flags/<int:internship_id>", methods=["PUT"])
+@jwt_required()
+def clear_flags(internship_id: int) -> Response:
+    """Clear all flags for an internship."""
+    internship = InternshipService.get_internship(internship_id)
+    user = UserService.get_user_by_id(get_jwt_identity())
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+    elif user.role_id != RoleEnum.admin.value:
+        response = {"message": "Unauthorized"}
+        return make_response(jsonify(response), 401)
+
+    FlagService.clear_flags(internship_id=internship_id)
+    InternshipService.unflag_internship(internship_id=internship_id)
+
+    response = {"message": "Flags cleared successfully"}
     return make_response(jsonify(response), 200)

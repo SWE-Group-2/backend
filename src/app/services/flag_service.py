@@ -39,3 +39,11 @@ class FlagService:
         """Get the number of flags for an internship."""
         flags = Flags.query.filter(Flags.internship_id == internship_id).all()
         return len(flags)
+
+    @staticmethod
+    def clear_flags(internship_id: int) -> None:
+        """Clear all flags for an internship."""
+        flags = Flags.query.filter(Flags.internship_id == internship_id).all()
+        for flag in flags:
+            db.session.delete(flag)
+        db.session.commit()
