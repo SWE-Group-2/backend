@@ -1,7 +1,7 @@
 from src.app.extensions import db
 
 
-class Flags(db.model):
+class Flags(db.Model):
     """Model for a Flag object."""
 
     id = db.Column(db.Integer, primary_key=True)

@@ -34,6 +34,8 @@ class EndpointEnum(enum.Enum):
     update_internship = "/internships/{internship_id}"
     add_time_period = "/admin/add_time_period"
     edit_profile = "/users/edit_profile"
+    flag_internship = "/internships/flag/{internship_id}"
+    unflag_internship = "/internships/unflag/{internship_id}"
 
 
 @pytest.fixture(scope="session")

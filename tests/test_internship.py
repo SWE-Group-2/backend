@@ -3,6 +3,7 @@ from datetime import datetime
 from flask.testing import FlaskClient
 
 from src.app import db
+from src.app.models.flags import Flags
 from src.app.models.internships import Internships
 from tests.conftest import EndpointEnum
 
@@ -294,3 +295,61 @@ def test_non_admin_delete_other_user_internship(
     )
     assert response.status_code == 401
     assert response.json == {"message": "Unauthorized"}
+
+
+def test_flag_internship(test_client: FlaskClient, session: db.session) -> None:
+    """Test the flag internship endpoint."""
+    response = test_client.put(
+        EndpointEnum.flag_internship.value.format(internship_id=1),
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 200
+    assert response.json == {"message": "Internship flagged successfully"}
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+    assert internship.flagged is True
+    flag = session.query(Flags).filter(Flags.internship_id == 1).first()
+    assert flag.internship_id == 1
+    assert flag.user_id == 1
+
+
+def test_flag_internship_dne(test_client: FlaskClient) -> None:
+    """Test the flag internship endpoint with invalid internship id."""
+    response = test_client.put(
+        EndpointEnum.flag_internship.value.format(internship_id=0),
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 404
+    assert response.json == {"message": "Internship not found"}
+
+
+def test_unflag_internship(test_client: FlaskClient, session: db.session) -> None:
+    """Test the unflag internship endpoint."""
+    flag = Flags(internship_id=1, user_id=1)
+    session.add(flag)
+    session.commit()
+
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+    internship.flagged = True
+    session.commit()
+
+    response = test_client.put(
+        EndpointEnum.unflag_internship.value.format(internship_id=1),
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 200
+    assert response.json == {"message": "Internship unflagged successfully"}
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+    assert internship.flagged is False
+
+    flag = session.query(Flags).filter(Flags.internship_id == 1).first()
+    assert flag is None
+
+
+def test_unflag_internship_dne(test_client: FlaskClient) -> None:
+    """Test the unflag internship endpoint with invalid internship id."""
+    response = test_client.put(
+        EndpointEnum.unflag_internship.value.format(internship_id=0),
+        headers={"Authorization": f"Bearer {get_token(test_client)}"},
+    )
+    assert response.status_code == 404
+    assert response.json == {"message": "Internship not found"}
