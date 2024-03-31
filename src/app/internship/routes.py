@@ -5,6 +5,7 @@ from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.internship import bp
+from src.app.models.roles import RoleEnum
 from src.app.services.internship_service import InternshipService
 from src.app.services.user_service import UserService
 
@@ -148,4 +149,44 @@ def delete_internship(internship_id: int) -> Response:
     InternshipService.delete_internship_by_id(internship_id=internship_id)
 
     response = {"message": "Internship deleted successfully"}
+    return make_response(jsonify(response), 200)
+
+
+@bp.route("/internships/flag/<int:internship_id>", methods=["PUT"])
+@jwt_required()
+def flag_internship(internship_id: int) -> Response:
+    """Flag an internship."""
+    internship = InternshipService.get_internship(internship_id)
+    user = UserService.get_user_by_id(get_jwt_identity())
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+    elif user.id != internship.author_id and user.role_id != RoleEnum.admin.value:
+        response = {"message": "Unauthorized"}
+        return make_response(jsonify(response), 401)
+
+    InternshipService.flag_internship(internship_id=internship_id)
+
+    response = {"message": "Internship flagged successfully"}
+    return make_response(jsonify(response), 200)
+
+
+@bp.route("/internships/unflag/<int:internship_id>", methods=["PUT"])
+@jwt_required()
+def unflag_internship(internship_id: int) -> Response:
+    """Unflag an internship."""
+    internship = InternshipService.get_internship(internship_id)
+    user = UserService.get_user_by_id(get_jwt_identity())
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+    elif user.id != internship.author_id and user.role_id != RoleEnum.admin.value:
+        response = {"message": "Unauthorized"}
+        return make_response(jsonify(response), 401)
+
+    InternshipService.unflag_internship(internship_id=internship_id)
+
+    response = {"message": "Internship unflagged successfully"}
     return make_response(jsonify(response), 200)
