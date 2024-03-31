@@ -322,18 +322,6 @@ def test_flag_internship_dne(test_client: FlaskClient) -> None:
     assert response.json == {"message": "Internship not found"}
 
 
-def test_flag_internship_unauthorized_user(
-    test_client: FlaskClient, student_access_token: str
-) -> None:
-    """Test the flag internship endpoint with an unauthorized user."""
-    response = test_client.put(
-        EndpointEnum.flag_internship.value.format(internship_id=1),
-        headers={"Authorization": f"Bearer {student_access_token}"},
-    )
-    assert response.status_code == 401
-    assert response.json == {"message": "Unauthorized"}
-
-
 def test_unflag_internship(test_client: FlaskClient, session: db.session) -> None:
     """Test the unflag internship endpoint."""
     flag = Flags(internship_id=1, user_id=1)
@@ -365,15 +353,3 @@ def test_unflag_internship_dne(test_client: FlaskClient) -> None:
     )
     assert response.status_code == 404
     assert response.json == {"message": "Internship not found"}
-
-
-def test_unflag_internship_unauthorized_user(
-    test_client: FlaskClient, student_access_token: str
-) -> None:
-    """Test the unflag internship endpoint with an unauthorized user."""
-    response = test_client.put(
-        EndpointEnum.unflag_internship.value.format(internship_id=1),
-        headers={"Authorization": f"Bearer {student_access_token}"},
-    )
-    assert response.status_code == 401
-    assert response.json == {"message": "Unauthorized"}

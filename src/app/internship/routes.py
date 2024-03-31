@@ -5,7 +5,6 @@ from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.internship import bp
-from src.app.models.roles import RoleEnum
 from src.app.services.flag_service import FlagService
 from src.app.services.internship_service import InternshipService
 from src.app.services.user_service import UserService
@@ -163,9 +162,6 @@ def flag_internship(internship_id: int) -> Response:
     if internship is None:
         response = {"message": "Internship not found"}
         return make_response(jsonify(response), 404)
-    elif user.id != internship.author_id and user.role_id != RoleEnum.admin.value:
-        response = {"message": "Unauthorized"}
-        return make_response(jsonify(response), 401)
 
     if not FlagService.user_has_flagged(internship_id=internship_id, user_id=user.id):
         FlagService.create_flag(internship_id=internship_id, user_id=user.id)
@@ -185,9 +181,6 @@ def unflag_internship(internship_id: int) -> Response:
     if internship is None:
         response = {"message": "Internship not found"}
         return make_response(jsonify(response), 404)
-    elif user.id != internship.author_id and user.role_id != RoleEnum.admin.value:
-        response = {"message": "Unauthorized"}
-        return make_response(jsonify(response), 401)
 
     if FlagService.user_has_flagged(internship_id=internship_id, user_id=user.id):
         FlagService.delete_flag(internship_id=internship_id, user_id=user.id)
