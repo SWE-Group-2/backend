@@ -30,7 +30,7 @@ RUN curl -sSL https://install.python-poetry.org | python
 
 # Copy project requirement files
 WORKDIR $PYSETUP_PATH
-COPY poetry.lock pyproject.toml ./
+COPY poetry.lock pyproject.toml README.md ./
 
 # Install main dependencies
 RUN poetry install --only main
