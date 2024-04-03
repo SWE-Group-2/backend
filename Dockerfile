@@ -33,7 +33,7 @@ WORKDIR $PYSETUP_PATH
 COPY poetry.lock pyproject.toml README.md ./
 
 # Install main dependencies
-RUN poetry install --only main
+RUN poetry install --only main --no-root
 
 
 # `development` image is used during development / testing
