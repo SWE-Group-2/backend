@@ -150,6 +150,7 @@ def get_user(user_id: int) -> Response:
         "linkedin_link": user.linkedin_link,
         "website_link": user.website_link,
         "profile_picture_link": user.profile_picture_link,
+        "cv_link": user.cv_link,
         "email": user.email,
         "phone_number": user.phone_number,
         "description": user.description,
@@ -182,6 +183,7 @@ def edit_user_profile() -> Response:
         linkedin_link = request.json["linkedin_link"]
         website_link = request.json["website_link"]
         profile_picture_link = request.json["profile_picture_link"]
+        cv_link = request.json["cv_link"]
         email = request.json["email"]
         phone_number = request.json["phone_number"]
         description = request.json["description"]
@@ -204,6 +206,7 @@ def edit_user_profile() -> Response:
         linkedin_link=linkedin_link,
         website_link=website_link,
         profile_picture_link=profile_picture_link,
+        cv_link=cv_link,
         email=email,
         phone_number=phone_number,
         description=description,

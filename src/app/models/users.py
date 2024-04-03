@@ -15,6 +15,7 @@ class Users(db.Model):
     linkedin_link = db.Column(db.String(255))
     website_link = db.Column(db.String(255))
     profile_picture_link = db.Column(db.String(255))
+    cv_link = db.Column(db.String(255))
     email = db.Column(db.String(255))
     phone_number = db.Column(db.String(255))
     description = db.Column(db.String(500))
