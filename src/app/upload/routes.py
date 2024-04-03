@@ -31,13 +31,14 @@ def upload_profilepic() -> Response:
 
     filename = f"profilepic_{get_jwt_identity()}{file_extension}"
     file_content = file.read()
+    url = UploadService.get_url_from_filename(filename, "AWS_BUCKET_NAME_PROFILEPICS")
 
     try:
         UploadService.upload_file_to_aws(
             BytesIO(file_content), filename, "AWS_BUCKET_NAME_PROFILEPICS", "image/png"
         )
         return jsonify(
-            {"message": "File uploaded successfully"}
+            {"message": "File uploaded successfully", "url": url}
         )  # Return success response
     except (BotoCoreError, ClientError) as e:
         response = {"message": "Error uploading file: {}".format(str(e))}
@@ -63,15 +64,15 @@ def upload_companypic() -> Response:
         return jsonify({"error": "Invalid file format. Only image files are allowed."})
 
     filename = f"companypic_{request.form['internship_id']}{file_extension}"
-
     file_content = file.read()
+    url = UploadService.get_url_from_filename(filename, "AWS_BUCKET_NAME_COMPANYPICS")
 
     try:
         UploadService.upload_file_to_aws(
             BytesIO(file_content), filename, "AWS_BUCKET_NAME_COMPANYPICS", "image/png"
         )
         return jsonify(
-            {"message": "File uploaded successfully"}
+            {"message": "File uploaded successfully", "url": url}
         )  # Return success response
     except (BotoCoreError, ClientError) as e:
         response = {"message": "Error uploading file: {}".format(str(e))}
@@ -100,12 +101,13 @@ def upload_cv() -> Response:
 
     filename = f"cv_{get_jwt_identity()}{file_extension}"
     file_content = file.read()
+    url = UploadService.get_url_from_filename(filename, "AWS_BUCKET_NAME_CVS")
 
     try:
         UploadService.upload_file_to_aws(
             BytesIO(file_content), filename, "AWS_BUCKET_NAME_CVS", "application/pdf"
         )
-        return jsonify({"message": "File uploaded successfully"})
+        return jsonify({"message": "File uploaded successfully", "url": url})
     except (BotoCoreError, ClientError) as e:
         response = {"message": "Error uploading file: {}".format(str(e))}
         return make_response(jsonify(response), 500)

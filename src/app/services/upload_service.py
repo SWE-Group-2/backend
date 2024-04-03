@@ -37,3 +37,8 @@ class UploadService:
         full_filenames = list(bucket.objects.filter(Prefix=filename))
         full_filename = full_filenames[0].key
         s3.Object(os.getenv(container), full_filename).delete()
+
+    @staticmethod
+    def get_url_from_filename(filename: str, container: str) -> str:
+        """Create a function for the file deletion endpoint."""
+        return f"https://{os.getenv(container)}.s3.{os.getenv('AWS_DEFAULT_REGION')}.amazonaws.com/{filename}"
