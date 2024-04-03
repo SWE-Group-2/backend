@@ -5,6 +5,7 @@ from flask import Response, jsonify, make_response, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.internship import bp
+from src.app.services.flag_service import FlagService
 from src.app.services.internship_service import InternshipService
 from src.app.services.user_service import UserService
 
@@ -46,6 +47,31 @@ def add_internship() -> Response:
 def get_internships() -> Response:
     """Return all internships endpoint."""
     internships = InternshipService.get_internships()
+
+    # Convert SQLAlchemy objects to dictionaries for JSON serialization
+    internships_data = [
+        {
+            "id": internship.id,
+            "company": internship.company,
+            "position": internship.position,
+            "website": internship.website,
+            "deadline": internship.deadline.strftime("%Y-%m-%d"),
+            "author_id": internship.author_id,
+            "time_period_id": internship.time_period_id,
+            "company_photo_link": internship.company_photo_link,
+            "flagged": internship.flagged,
+            "created_at": internship.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for internship in internships
+    ]
+
+    return jsonify(internships_data)
+
+
+@bp.route("/internships/by_user/<int:user_id>", methods=["GET"])
+def get_internships_by_user(user_id: int) -> Response:
+    """Return all internships by user."""
+    internships = InternshipService.get_internships_by_user(user_id)
 
     # Convert SQLAlchemy objects to dictionaries for JSON serialization
     internships_data = [
@@ -148,4 +174,44 @@ def delete_internship(internship_id: int) -> Response:
     InternshipService.delete_internship_by_id(internship_id=internship_id)
 
     response = {"message": "Internship deleted successfully"}
+    return make_response(jsonify(response), 200)
+
+
+@bp.route("/internships/flag/<int:internship_id>", methods=["PUT"])
+@jwt_required()
+def flag_internship(internship_id: int) -> Response:
+    """Flag an internship."""
+    internship = InternshipService.get_internship(internship_id)
+    user = UserService.get_user_by_id(get_jwt_identity())
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+
+    if not FlagService.user_has_flagged(internship_id=internship_id, user_id=user.id):
+        FlagService.create_flag(internship_id=internship_id, user_id=user.id)
+        InternshipService.flag_internship(internship_id=internship_id)
+
+    response = {"message": "Internship flagged successfully"}
+    return make_response(jsonify(response), 200)
+
+
+@bp.route("/internships/unflag/<int:internship_id>", methods=["PUT"])
+@jwt_required()
+def unflag_internship(internship_id: int) -> Response:
+    """Unflag an internship."""
+    internship = InternshipService.get_internship(internship_id)
+    user = UserService.get_user_by_id(get_jwt_identity())
+
+    if internship is None:
+        response = {"message": "Internship not found"}
+        return make_response(jsonify(response), 404)
+
+    if FlagService.user_has_flagged(internship_id=internship_id, user_id=user.id):
+        FlagService.delete_flag(internship_id=internship_id, user_id=user.id)
+
+    if FlagService.num_flags(internship_id) == 0:
+        InternshipService.unflag_internship(internship_id=internship_id)
+
+    response = {"message": "Internship unflagged successfully"}
     return make_response(jsonify(response), 200)
