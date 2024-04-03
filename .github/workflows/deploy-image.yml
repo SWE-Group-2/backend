@@ -5,7 +5,6 @@ on:
     branches: ['release']
 env:
   REGISTRY: ghcr.io
-  BASE_IMG_NAME: icis-backend
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -20,16 +19,16 @@ jobs:
       with:
         registry: ${{ env.REGISTRY }}
         username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        password: ${{ secrets.ICIS_DOCKER_CONTAINER_REGISTRY_TOKEN }}
     - name: Derive short SHA name
       id: vars
       run: echo "::set-output name=sha_short::$(git rev-parse --short HEAD)"
     - name: Build the Docker image
       run: |
         docker build . --file Dockerfile \
-        --tag ghcr.io/mythicalbadger/${{ env.BASE_IMG_NAME }}:${{ steps.vars.outputs.sha_short }} \
-        --tag ghcr.io/mythicalbadger${{ env.BASE_IMG_NAME }}:latest
+        --tag ghcr.io/swe-group-2/backend:${{ steps.vars.outputs.sha_short }} \
+        --tag ghcr.io/swe-group-2/backend:latest
     - name: Publish the images
       run: |
-        docker push ghcr.io/mythicalbadger/${{ env.BASE_IMG_NAME }}:${{ steps.vars.outputs.sha_short }}
-        docker push ghcr.io/mythicalbadger/${{ env.BASE_IMG_NAME }}:latest
+        docker push ghcr.io/swe-group-2/backend:${{ steps.vars.outputs.sha_short }}
+        docker push ghcr.io/swe-group-2/backend:latest
