@@ -5,7 +5,7 @@ on:
     branches: ['release']
 env:
   REGISTRY: ghcr.io
-  BASE_IMG_NAME: icisbackend
+  BASE_IMG_NAME: icis-backend
 jobs:
   build:
     runs-on: ubuntu-latest
