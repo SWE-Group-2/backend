@@ -4,12 +4,15 @@ from io import BytesIO
 
 from botocore.exceptions import BotoCoreError, ClientError
 from flask import Response, jsonify, make_response, request
+from flask_jwt_extended import get_jwt_identity, jwt_required
 
 from src.app.services.upload_service import UploadService
+from src.app.services.user_service import UserService
 from src.app.upload import bp
 
 
 @bp.route("/upload_profilepic", methods=["OPTIONS", "PUT"])
+@jwt_required()
 def upload_profilepic() -> Response:
     """Upload profile picture file to cloud container."""
     if request.method == "OPTIONS":
@@ -26,12 +29,12 @@ def upload_profilepic() -> Response:
     if file_extension[1:] not in allowed_extensions:
         return jsonify({"error": "Invalid file format. Only image files are allowed."})
 
-    filename = "profilepic_" + request.form["user_id"] + file_extension
+    filename = f"profilepic_{get_jwt_identity()}{file_extension}"
     file_content = file.read()
 
     try:
         UploadService.upload_file_to_aws(
-            BytesIO(file_content), filename, "AWS_BUCKET_NAME_PROFILEPICS"
+            BytesIO(file_content), filename, "AWS_BUCKET_NAME_PROFILEPICS", "image/png"
         )
         return jsonify(
             {"message": "File uploaded successfully"}
@@ -42,6 +45,7 @@ def upload_profilepic() -> Response:
 
 
 @bp.route("/upload_companypic", methods=["OPTIONS", "PUT"])
+@jwt_required()
 def upload_companypic() -> Response:
     """Upload company picture file to cloud container."""
     if request.method == "OPTIONS":
@@ -58,13 +62,13 @@ def upload_companypic() -> Response:
     if file_extension[1:] not in allowed_extensions:
         return jsonify({"error": "Invalid file format. Only image files are allowed."})
 
-    filename = "companypic_" + request.form["internship_id"] + file_extension
+    filename = f"companypic_{request.form['internship_id']}{file_extension}"
 
     file_content = file.read()
 
     try:
         UploadService.upload_file_to_aws(
-            BytesIO(file_content), filename, "AWS_BUCKET_NAME_COMPANYPICS"
+            BytesIO(file_content), filename, "AWS_BUCKET_NAME_COMPANYPICS", "image/png"
         )
         return jsonify(
             {"message": "File uploaded successfully"}
@@ -75,6 +79,7 @@ def upload_companypic() -> Response:
 
 
 @bp.route("/upload_cv", methods=["OPTIONS", "PUT"])
+@jwt_required()
 def upload_cv() -> Response:
     """Upload cv file to cloud container."""
     if request.method == "OPTIONS":
@@ -93,12 +98,12 @@ def upload_cv() -> Response:
             {"error": "Invalid file format. Only pdf or docx files are allowed."}
         )
 
-    filename = "cv_" + request.form["user_id"] + file_extension
+    filename = f"cv_{get_jwt_identity()}{file_extension}"
     file_content = file.read()
 
     try:
         UploadService.upload_file_to_aws(
-            BytesIO(file_content), filename, "AWS_BUCKET_NAME_CVS"
+            BytesIO(file_content), filename, "AWS_BUCKET_NAME_CVS", "application/pdf"
         )
         return jsonify({"message": "File uploaded successfully"})
     except (BotoCoreError, ClientError) as e:
@@ -107,6 +112,7 @@ def upload_cv() -> Response:
 
 
 @bp.route("/delete_profilepic", methods=["OPTIONS", "DELETE"])
+@jwt_required()
 def delete_profilepic() -> Response:
     """Delete profile pic from cloud container."""
     if request.method == "OPTIONS":
@@ -116,10 +122,11 @@ def delete_profilepic() -> Response:
         response.headers.add("Access-Control-Allow-Methods", "*")
         return response
 
-    filename = "profilepic_" + request.form["user_id"]
+    filename = f"profilepic_{get_jwt_identity()}"
 
     try:
         UploadService.delete_file_from_aws(filename, "AWS_BUCKET_NAME_PROFILEPICS")
+        UserService.clear_profile_picture(user_id=get_jwt_identity())
         return jsonify({"message": "File deleted successfully"})
     except (BotoCoreError, ClientError) as e:
         response = {"message": "Error deleting file: {}".format(str(e))}
@@ -127,6 +134,7 @@ def delete_profilepic() -> Response:
 
 
 @bp.route("/delete_companypic", methods=["OPTIONS", "DELETE"])
+@jwt_required()
 def delete_companypic() -> Response:
     """Delete company pic from cloud container."""
     if request.method == "OPTIONS":
@@ -136,7 +144,7 @@ def delete_companypic() -> Response:
         response.headers.add("Access-Control-Allow-Methods", "*")
         return response
 
-    filename = "companypic_" + request.form["internship_id"]
+    filename = f"companypic_{request.form['internship_id']}"
 
     try:
         UploadService.delete_file_from_aws(filename, "AWS_BUCKET_NAME_COMPANYPICS")
@@ -147,6 +155,7 @@ def delete_companypic() -> Response:
 
 
 @bp.route("/delete_cv", methods=["OPTIONS", "DELETE"])
+@jwt_required()
 def delete_cv() -> Response:
     """Delete cv from cloud container."""
     if request.method == "OPTIONS":
@@ -156,10 +165,11 @@ def delete_cv() -> Response:
         response.headers.add("Access-Control-Allow-Methods", "*")
         return response
 
-    filename = "cv_" + request.form["user_id"]
+    filename = f"cv_{get_jwt_identity()}"
 
     try:
         UploadService.delete_file_from_aws(filename, "AWS_BUCKET_NAME_CVS")
+        UserService.clear_cv(user_id=get_jwt_identity())
         return jsonify({"message": "File deleted successfully"})
     except (BotoCoreError, ClientError) as e:
         response = {"message": "Error deleting file: {}".format(str(e))}
