@@ -27,9 +27,9 @@ jobs:
     - name: Build the Docker image
       run: |
         docker build . --file Dockerfile \
-        --tag ghcr.io/${{ env.BASE_IMG_NAME }}:${{ steps.vars.outputs.sha_short }} \
-        --tag ghcr.io/${{ env.BASE_IMG_NAME }}:latest
+        --tag ghcr.io/mythicalbadger/${{ env.BASE_IMG_NAME }}:${{ steps.vars.outputs.sha_short }} \
+        --tag ghcr.io/mythicalbadger${{ env.BASE_IMG_NAME }}:latest
     - name: Publish the images
       run: |
-        docker push ghcr.io/${{ env.BASE_IMG_NAME }}:${{ steps.vars.outputs.sha_short }}
-        docker push ghcr.io/${{ env.BASE_IMG_NAME }}:latest
+        docker push ghcr.io/mythicalbadger/${{ env.BASE_IMG_NAME }}:${{ steps.vars.outputs.sha_short }}
+        docker push ghcr.io/mythicalbadger/${{ env.BASE_IMG_NAME }}:latest
