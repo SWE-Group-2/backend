@@ -162,6 +162,7 @@ def test_update_user(
         "linkedin_link": "www.linkedin.com/profile",
         "website_link": "www.uwu.com",
         "profile_picture_link": "www.owo.com",
+        "cv_link": "www.cv.com",
         "email": "changed@muic.edu",
         "phone_number": "011-456-7881",
         "description": "Knock, knock. Who's there? Just me. Just me who? Just me, I'm updated.",
