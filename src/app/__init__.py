@@ -6,6 +6,7 @@ from typing import Optional
 from dotenv import load_dotenv
 from flask import Flask
 from flask_cors import CORS
+from flask_dance.contrib.google import make_google_blueprint
 from flask_jwt_extended import JWTManager
 
 from config import Config
@@ -21,6 +22,13 @@ def create_app(config: Optional = Config) -> Flask:
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
     CORS(app, resources={r"/*": {"origins": "*"}})
     JWTManager(app)
+
+    google_bp = make_google_blueprint(
+        client_id=os.getenv("GOOGLE_CLIENT_ID"),
+        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        scope=["email", "profile"],
+    )
+    app.register_blueprint(google_bp, url_prefix="/login/google")
 
     # Initialize extensions
     db.init_app(app)

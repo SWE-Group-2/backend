@@ -1,6 +1,8 @@
 from flask.testing import FlaskClient
 
 from src.app import db
+from src.app.models.flags import Flags
+from src.app.models.internships import Internships
 from src.app.models.roles import RoleEnum
 from src.app.models.time_periods import TimePeriods
 from src.app.models.users import Users
@@ -229,3 +231,32 @@ def test_delete_time_period_non_admin(
     )
     assert response.status_code == 401
     assert response.json == {"message": "Unauthorized"}
+
+
+def test_clear_flags(
+    test_client: FlaskClient, session: db.session, admin_access_token: str
+) -> None:
+    """Test the clear flags endpoint."""
+    admin_flag = Flags(
+        internship_id=1,
+        user_id=1,
+    )
+    user_flag = Flags(
+        internship_id=1,
+        user_id=2,
+    )
+    db.session.add(admin_flag)
+    db.session.add(user_flag)
+    db.session.commit()
+
+    response = test_client.put(
+        "/internships/clear_flags/1",
+        headers={"Authorization": f"Bearer {admin_access_token}"},
+    )
+
+    assert response.status_code == 200
+    assert response.json == {"message": "Flags cleared successfully"}
+    flags = session.query(Flags).filter(Flags.internship_id == 1).all()
+    assert len(flags) == 0
+    internship = session.query(Internships).filter(Internships.id == 1).first()
+    assert internship.flagged is False
