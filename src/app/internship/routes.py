@@ -68,6 +68,31 @@ def get_internships() -> Response:
     return jsonify(internships_data)
 
 
+@bp.route("/internships/by_user/<int:user_id>", methods=["GET"])
+def get_internships_by_user(user_id: int) -> Response:
+    """Return all internships by user."""
+    internships = InternshipService.get_internships_by_user(user_id)
+
+    # Convert SQLAlchemy objects to dictionaries for JSON serialization
+    internships_data = [
+        {
+            "id": internship.id,
+            "company": internship.company,
+            "position": internship.position,
+            "website": internship.website,
+            "deadline": internship.deadline.strftime("%Y-%m-%d"),
+            "author_id": internship.author_id,
+            "time_period_id": internship.time_period_id,
+            "company_photo_link": internship.company_photo_link,
+            "flagged": internship.flagged,
+            "created_at": internship.created_at.strftime("%Y-%m-%d %H:%M:%S"),
+        }
+        for internship in internships
+    ]
+
+    return jsonify(internships_data)
+
+
 @bp.route("/internships/<int:internship_id>", methods=["GET"])
 def view_internship(internship_id: int) -> Response:
     """Return internship information."""
