@@ -51,11 +51,11 @@ WORKDIR /app
 COPY config.py ./
 COPY src ./src/
 
-WORKDIR /app/src
-
 # Quicker install as runtime deps are already installed
 RUN poetry install
 RUN pip install psycopg2-binary
+
+WORKDIR /app/src
 
 # Expose port for Flask
 EXPOSE 5000
