@@ -6,7 +6,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: icis-backend
+  IMAGE_NAME: icis_backend
 
 jobs:
   build-and-push-image:
