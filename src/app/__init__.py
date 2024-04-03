@@ -130,4 +130,8 @@ def create_app(config: Optional = Config) -> Flask:
 
     app.register_blueprint(time_periods_blueprint)
 
+    from src.app.upload import bp as upload_blueprint
+
+    app.register_blueprint(upload_blueprint)
+
     return app
