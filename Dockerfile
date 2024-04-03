@@ -45,15 +45,15 @@ WORKDIR $PYSETUP_PATH
 COPY --from=builder-base $POETRY_HOME $POETRY_HOME
 COPY --from=builder-base $PYSETUP_PATH $PYSETUP_PATH
 
+# Quicker install as runtime deps are already installed
+RUN poetry install --no-root
+RUN pip install psycopg2-binary
+
 # Copy the app
 WORKDIR /app
 
 COPY config.py ./
 COPY src ./src/
-
-# Quicker install as runtime deps are already installed
-RUN poetry install
-RUN pip install psycopg2-binary
 
 WORKDIR /app/src
 
